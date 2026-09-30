@@ -1,506 +1,550 @@
-// =========================================
-// NEKKO WD
-// Menu
-// =========================================
 
-async function changeStore() {
+/**
+ * NEKKO WD — Lógica do painel principal
+ * Carrega os dados da empresa e da unidade ativa.
+ */
+(() => {
+  'use strict';
 
-    const context = Storage.getContext();
+  const supabase = window.supabaseClient;
 
-    if (context.role === Roles.CEO) {
+  const $ = (id) => document.getElementById(id);
 
-        window.location.href = "../mode/index.html";
-        return;
+  const pageTitles = {
+    dashboard: {
+      title: 'Visão geral',
+      subtitle: 'Acompanhe os indicadores da sua marcenaria.'
+    },
+    projects: {
+      title: 'Projetos e serviços',
+      subtitle: 'Organize os projetos e acompanhe sua produção.'
+    },
+    clients: {
+      title: 'Clientes',
+      subtitle: 'Consulte e organize seus clientes.'
+    },
+    budgets: {
+      title: 'Orçamentos',
+      subtitle: 'Gerencie propostas e valores dos projetos.'
+    },
+    materials: {
+      title: 'Materiais e estoque',
+      subtitle: 'Controle os materiais utilizados na produção.'
+    },
+    finance: {
+      title: 'Financeiro',
+      subtitle: 'Acompanhe as entradas e saídas da empresa.'
+    },
+    reports: {
+      title: 'Relatórios',
+      subtitle: 'Consulte os indicadores da operação.'
+    },
+    stores: {
+      title: 'Unidades',
+      subtitle: 'Consulte as unidades da sua empresa.'
+    },
+    settings: {
+      title: 'Configurações',
+      subtitle: 'Gerencie as informações da sua empresa.'
+    }
+  };
 
+  let currentUser = null;
+  let activeCompany = null;
+  let activeStore = null;
+  let activeMembership = null;
+
+  function showMessage(text, type = 'error') {
+    const element = $('pageMessage');
+
+    if (!element) return;
+
+    element.textContent = text;
+    element.className = 'mb-5 rounded-xl border p-4 text-sm';
+
+    if (type === 'success') {
+      element.classList.add(
+        'border-green-500/30',
+        'bg-green-500/10',
+        'text-green-400'
+      );
+    } else {
+      element.classList.add(
+        'border-red-500/30',
+        'bg-red-500/10',
+        'text-red-400'
+      );
+    }
+  }
+
+  function hideMessage() {
+    const element = $('pageMessage');
+
+    if (!element) return;
+
+    element.textContent = '';
+    element.className = 'mb-5 hidden rounded-xl border p-4 text-sm';
+  }
+
+  function formatCurrency(value) {
+    return Number(value || 0).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+  }
+
+  function formatDate(value) {
+    if (!value) return '—';
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return '—';
+
+    return date.toLocaleDateString('pt-BR');
+  }
+
+  function setText(id, value) {
+    const element = $(id);
+
+    if (element) {
+      element.textContent = value ?? '—';
+    }
+  }
+
+  function getDisplayName(user) {
+    const metadata = user?.user_metadata || {};
+
+    return (
+      metadata.full_name ||
+      metadata.name ||
+      user?.email?.split('@')[0] ||
+      'Usuário'
+    );
+  }
+
+  function getFirstName(name) {
+    return String(name || '').trim().split(/\s+/)[0] || 'bem-vindo';
+  }
+
+  function updateHeader() {
+    const name = getDisplayName(currentUser);
+    const companyName = activeCompany?.name || 'Sua marcenaria';
+    const storeName = activeStore?.name || 'Unidade principal';
+
+    setText('sidebarUserName', name);
+    setText('sidebarCompanyName', companyName);
+    setText('welcomeName', getFirstName(name));
+    setText('headerCompanyName', companyName);
+    setText('headerStoreName', storeName);
+  }
+
+  async function loadContext() {
+    const result = await window.NekkoBootstrap.init();
+
+    if (!result || result.status !== 'ready') {
+      if (result?.status === 'no_company') {
+        window.location.replace('../onboarding/company.html');
+        return false;
+      }
+
+      if (result?.status === 'no_store') {
+        window.location.replace('../onboarding/stores.html');
+        return false;
+      }
+
+      throw new Error(
+        'Não foi possível inicializar o ambiente da empresa.'
+      );
     }
 
-    await Auth.logout();
+    currentUser = await window.NekkoAuth.getCurrentUser();
 
-    Storage.clear();
-    sessionStorage.clear();
+    if (!currentUser) {
+      window.location.replace('../login/login.html');
+      return false;
+    }
 
-    window.location.href = "../login/login.html";
+    const context = window.NekkoStorage?.getContext?.() || {};
 
-}
+    activeMembership = context.membership || result.membership || null;
+    activeCompany = context.company || result.company || null;
+    activeStore = context.activeStore || result.activeStore || null;
 
-document.addEventListener("DOMContentLoaded", async () => {
+    // Recupera os dados diretamente caso o bootstrap não os devolva
+    // na mesma estrutura usada pelo armazenamento de contexto.
+    if (!activeMembership) {
+      const { data, error } = await supabase
+        .from('company_members')
+        .select('id, company_id, user_id, store_id, role, is_active')
+        .eq('user_id', currentUser.id)
+        .eq('is_active', true)
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      activeMembership = data;
+    }
+
+    if (!activeMembership?.company_id) {
+      window.location.replace('../onboarding/company.html');
+      return false;
+    }
+
+    if (!activeCompany) {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('id, name')
+        .eq('id', activeMembership.company_id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      activeCompany = data;
+    }
+
+    if (!activeStore) {
+      let storeQuery = supabase
+        .from('stores')
+        .select('id, company_id, name')
+        .eq('company_id', activeMembership.company_id)
+        .eq('is_active', true)
+        .limit(1);
+
+      if (activeMembership.store_id) {
+        storeQuery = supabase
+          .from('stores')
+          .select('id, company_id, name')
+          .eq('company_id', activeMembership.company_id)
+          .eq('id', activeMembership.store_id)
+          .eq('is_active', true)
+          .limit(1);
+      }
+
+      const { data, error } = await storeQuery;
+
+      if (error) throw error;
+
+      activeStore = data?.[0] || null;
+    }
+
+    if (!activeStore) {
+      window.location.replace('../onboarding/stores.html');
+      return false;
+    }
+
+    updateHeader();
+    return true;
+  }
+
+  function getScopedQuery(table, columns = '*') {
+    let query = supabase
+      .from(table)
+      .select(columns)
+      .eq('company_id', activeMembership.company_id);
+
+    if (activeStore?.id) {
+      query = query.eq('store_id', activeStore.id);
+    }
+
+    return query;
+  }
+
+  async function loadCounts() {
+    const companyId = activeMembership.company_id;
+    const storeId = activeStore.id;
+
+    const [projectsResult, clientsResult, budgetsResult, materialsResult] =
+      await Promise.all([
+        supabase
+          .from('woodworking_projects')
+          .select('id', { count: 'exact', head: true })
+          .eq('company_id', companyId)
+          .eq('store_id', storeId)
+          .in('status', ['PENDING', 'IN_PROGRESS']),
+
+        supabase
+          .from('clients')
+          .select('id', { count: 'exact', head: true })
+          .eq('company_id', companyId)
+          .eq('store_id', storeId),
+
+        supabase
+          .from('budgets')
+          .select('id', { count: 'exact', head: true })
+          .eq('company_id', companyId)
+          .eq('store_id', storeId),
+
+        supabase
+          .from('materials')
+          .select('id', { count: 'exact', head: true })
+          .eq('company_id', companyId)
+          .eq('store_id', storeId)
+          .eq('is_active', true)
+      ]);
+
+    const results = [
+      projectsResult,
+      clientsResult,
+      budgetsResult,
+      materialsResult
+    ];
+
+    const failed = results.find((result) => result.error);
+
+    if (failed) throw failed.error;
+
+    setText('activeProjectsCount', projectsResult.count ?? 0);
+    setText('clientsCount', clientsResult.count ?? 0);
+    setText('budgetsCount', budgetsResult.count ?? 0);
+    setText('materialsCount', materialsResult.count ?? 0);
+  }
+
+  async function loadFinance() {
+    const { data, error } = await getScopedQuery(
+      'financial_transactions',
+      'amount, transaction_type, status'
+    );
+
+    if (error) throw error;
+
+    let income = 0;
+    let expenses = 0;
+
+    for (const transaction of data || []) {
+      // O painel considera apenas lançamentos efetivamente pagos.
+      if (transaction.status !== 'PAID') continue;
+
+      const amount = Number(transaction.amount || 0);
+
+      if (transaction.transaction_type === 'INCOME') {
+        income += amount;
+      } else if (transaction.transaction_type === 'EXPENSE') {
+        expenses += amount;
+      }
+    }
+
+    setText('financialIncome', formatCurrency(income));
+    setText('financialExpenses', formatCurrency(expenses));
+  }
+
+  function getStatusLabel(status) {
+    const labels = {
+      QUOTE: 'Orçamento',
+      PENDING: 'Pendente',
+      IN_PROGRESS: 'Em andamento',
+      COMPLETED: 'Concluído',
+      DELIVERED: 'Entregue',
+      CANCELLED: 'Cancelado'
+    };
+
+    return labels[status] || status || 'Sem status';
+  }
+
+  function getStatusClass(status) {
+    const classes = {
+      QUOTE: 'bg-purple-500/10 text-purple-400',
+      PENDING: 'bg-yellow-500/10 text-yellow-400',
+      IN_PROGRESS: 'bg-blue-500/10 text-blue-400',
+      COMPLETED: 'bg-green-500/10 text-green-400',
+      DELIVERED: 'bg-green-500/10 text-green-400',
+      CANCELLED: 'bg-red-500/10 text-red-400'
+    };
+
+    return classes[status] || 'bg-white/5 text-neutral-400';
+  }
+
+  function renderRecentProjects(projects) {
+    const container = $('recentProjects');
+
+    if (!container) return;
+
+    if (!projects?.length) {
+      container.innerHTML = `
+        <div class="p-10 text-center">
+          <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-neutral-500">
+            <i data-lucide="folder-open" class="h-6 w-6"></i>
+          </div>
+          <p class="text-sm font-medium text-neutral-300">
+            Nenhum projeto cadastrado
+          </p>
+          <p class="mt-1 text-xs text-neutral-500">
+            Seus novos projetos aparecerão aqui.
+          </p>
+        </div>
+      `;
+
+      if (window.lucide) window.lucide.createIcons();
+      return;
+    }
+
+    const rows = projects.map((project) => `
+      <tr class="border-b border-nekko-border/70 last:border-0">
+        <td class="px-5 py-4">
+          <p class="font-medium text-neutral-200">
+            ${escapeHTML(project.title || 'Projeto sem título')}
+          </p>
+          <p class="mt-1 text-xs text-neutral-500">
+            ${project.project_number != null
+              ? `Projeto #${escapeHTML(String(project.project_number))}`
+              : 'Projeto'}
+          </p>
+        </td>
+        <td class="px-5 py-4">
+          <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusClass(project.status)}">
+            ${escapeHTML(getStatusLabel(project.status))}
+          </span>
+        </td>
+        <td class="whitespace-nowrap px-5 py-4 text-sm text-neutral-400">
+          ${formatDate(project.created_at)}
+        </td>
+      </tr>
+    `).join('');
+
+    container.innerHTML = `
+      <table class="w-full min-w-[520px] text-left">
+        <thead>
+          <tr class="border-b border-nekko-border text-xs uppercase tracking-wider text-neutral-500">
+            <th class="px-5 py-4 font-medium">Projeto</th>
+            <th class="px-5 py-4 font-medium">Status</th>
+            <th class="px-5 py-4 font-medium">Cadastro</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, (character) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[character]);
+  }
+
+  async function loadRecentProjects() {
+    const { data, error } = await supabase
+      .from('woodworking_projects')
+      .select('id, project_number, title, status, created_at')
+      .eq('company_id', activeMembership.company_id)
+      .eq('store_id', activeStore.id)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (error) throw error;
+
+    renderRecentProjects(data || []);
+  }
+
+  async function loadDashboard() {
+    hideMessage();
 
     try {
+      await Promise.all([
+        loadCounts(),
+        loadFinance(),
+        loadRecentProjects()
+      ]);
+    } catch (error) {
+      console.error('[NEKKO WD] Erro ao carregar o painel:', error);
+      showMessage(
+        'Não foi possível carregar todos os indicadores. Verifique as permissões RLS do Supabase e tente atualizar a página.'
+      );
+    }
+  }
 
-        // ---------------------------------
-        // Inicializar contexto
-        // ---------------------------------
+  function navigate(page) {
+    const details = pageTitles[page];
 
-        const result = await Bootstrap.init();
+    if (!details) return;
 
-        if (result.status !== "READY") {
+    document.querySelectorAll('[data-page]').forEach((button) => {
+      button.classList.toggle(
+        'active',
+        button.dataset.page === page &&
+        button.classList.contains('sidebar-link')
+      );
+    });
 
-            window.location.href = "../login/login.html";
-            return;
+    setText('pageTitle', details.title);
+    setText('pageSubtitle', details.subtitle);
 
-        }
+    $('sidebar')?.classList.remove('open');
+    $('mobileOverlay')?.classList.remove('open');
 
-        const {
-            user,
-            company,
-            store,
-            role
-        } = result.context;
-
-        // ---------------------------------
-        // Usuário
-        // ---------------------------------
-
-        document.getElementById("userName").textContent =
-            user.name ||
-            user.email ||
-            "Usuário";
-
-        // ---------------------------------
-        // Badges
-        // ---------------------------------
-        
-        const modeBadge = document.getElementById("modeBadge");
-        const currentStore = document.getElementById("currentStore");
-        
-        // Badge do modo (CEO, MANAGER, etc.)
-        modeBadge.classList.remove("hidden");
-        modeBadge.textContent = role;
-        
-        // Nome da loja no centro da tela
-        if (currentStore) {
-        
-            currentStore.textContent =
-                store?.name || "Todas as Lojas";
-        
-        }
-
-        // ---------------------------------
-        // Módulos
-        // ---------------------------------
-
-        const modules = [
-
-            {
-                title: "Dashboard",
-                description: "Visão geral da marcenaria",
-                icon: "layout-dashboard",
-                href: "../dashboard/index.html",
-                roles: [Roles.CEO]
-            },
-
-            {
-                title: "Novo Orçamento",
-                description: "Criar um novo orçamento de marcenaria",
-                icon: "file-plus-2",
-                href: "../budgets/create.html",
-                roles: [Roles.CEO, Roles.MANAGER]
-            },
-
-            {
-                title: "Novo Serviço",
-                description: "Cadastrar um novo projeto de marcenaria",
-                icon: "ruler",
-                href: "../services/create.html",
-                roles: [
-                    Roles.CEO,
-                    Roles.MANAGER,
-                    Roles.EMPLOYEE,
-                    Roles.TECHNICIAN
-                ]
-            },
-
-            {
-                title: "Serviços",
-                description: "Consultar projetos e serviços cadastrados",
-                icon: "panels-top-left",
-                href: "../services/index.html",
-                roles: [
-                    Roles.CEO,
-                    Roles.MANAGER,
-                    Roles.EMPLOYEE,
-                    Roles.TECHNICIAN
-                ]
-            },
-
-            {
-                title: "Clientes",
-                description: "Gerenciar clientes e seus projetos",
-                icon: "users",
-                href: "../clientes/index.html",
-                roles: [
-                    Roles.CEO,
-                    Roles.MANAGER,
-                    Roles.EMPLOYEE,
-                    Roles.TECHNICIAN
-                ]
-            },
-
-            {
-                title: "Equipe",
-                description: "Gerenciar profissionais da marcenaria",
-                icon: "users-round",
-                href: "../team/index.html",
-                roles: [
-                    Roles.CEO,
-                ]
-            },
-
-            {
-                title: "Materiais",
-                description: "Gerenciar MDF, madeira, cores e materiais",
-                icon: "layers-3",
-                href: "../materials/index.html",
-                roles: [
-                    Roles.CEO,
-                    Roles.MANAGER,
-                    Roles.EMPLOYEE
-                ]
-            },
-
-            {
-                title: "Trocar Empresa",
-                description: "Entrar em outra empresa ou unidade",
-                icon: "repeat",
-                href: "#",
-                action: "change-store",
-                roles: [
-                    Roles.CEO,
-                    Roles.MANAGER,
-                    Roles.EMPLOYEE,
-                    Roles.TECHNICIAN
-                ]
-            },
-
-            {
-                title: "Importar Projetos",
-                description: "Migrar projetos de outro sistema",
-                icon: "file-up",
-                href: "../import-projects/index.html",
-                roles: [Roles.CEO]
-            },
-
-            {
-                title: "Configurações",
-                description: "Preferências da marcenaria e do sistema",
-                icon: "settings",
-                href: "../settings/index.html",
-                roles: [Roles.CEO]
-            }
-
-        ];
-        // ---------------------------------
-        // Renderizar módulos
-        // ---------------------------------
-
-        const grid = document.getElementById("menuGrid");
-
-        grid.innerHTML = "";
-
-        modules
-            .filter(module => module.roles.includes(role))
-            .forEach(module => {
-
-                grid.innerHTML += `
-
-                    <a
-                        href="${module.href || "#"}"
-                        ${module.action ? `data-action="${module.action}"` : ""}
-                
-                        class="
-                            group
-                            relative
-                            overflow-hidden
-                
-                            min-h-[210px]
-                
-                            bg-[#0C110E]/85
-                            backdrop-blur-xl
-                
-                            border
-                            border-[#202923]
-                
-                            rounded-[28px]
-                
-                            p-6
-                            md:p-7
-                
-                            transition-all
-                            duration-300
-                
-                            hover:-translate-y-1
-                
-                            hover:border-orange-500/30
-                
-                            hover:bg-[#101710]/95
-                
-                            hover:shadow-[0_18px_50px_rgba(0,0,0,.25)]
-                
-                            flex
-                            flex-col
-                        "
-                    >
-                
-                
-                        <!-- BRILHO DO CARD -->
-                
-                        <div
-                            class="
-                                absolute
-                                -top-20
-                                -right-20
-                
-                                w-40
-                                h-40
-                
-                                rounded-full
-                
-                                bg-orange-300/5
-                
-                                blur-3xl
-                
-                                opacity-0
-                                group-hover:opacity-100
-                
-                                transition
-                                duration-500
-                            "
-                        ></div>
-                
-                
-                
-                        <!-- LINHA SUPERIOR -->
-                
-                        <div
-                            class="
-                                relative
-                                flex
-                                items-start
-                                justify-between
-                                gap-4
-                            "
-                        >
-                
-                            <!-- ÍCONE -->
-                
-                            <div
-                                class="
-                                    w-12
-                                    h-12
-                
-                                    rounded-2xl
-                
-                                    bg-white/[0.025]
-                
-                                    border
-                                    border-[#29322C]
-                
-                                    flex
-                                    items-center
-                                    justify-center
-                
-                                    text-slate-400
-                
-                                    group-hover:text-orange-300
-                                    group-hover:border-orange-500/20
-                                    group-hover:bg-orange-500/5
-                
-                                    transition-all
-                                    duration-300
-                                "
-                            >
-                
-                                <i
-                                    data-lucide="${module.icon}"
-                                    class="
-                                        w-5
-                                        h-5
-                
-                                        transition
-                                        duration-300
-                
-                                        group-hover:scale-110
-                                    "
-                                ></i>
-                
-                            </div>
-                
-                
-                
-                            <!-- SETA -->
-                
-                            <div
-                                class="
-                                    w-8
-                                    h-8
-                
-                                    rounded-xl
-                
-                                    border
-                                    border-[#202923]
-                
-                                    flex
-                                    items-center
-                                    justify-center
-                
-                                    text-slate-700
-                
-                                    group-hover:text-orange-300
-                                    group-hover:border-orange-500/20
-                
-                                    transition-all
-                                    duration-300
-                                "
-                            >
-                
-                                <i
-                                    data-lucide="arrow-up-right"
-                                    class="
-                                        w-4
-                                        h-4
-                
-                                        transition
-                                        duration-300
-                
-                                        group-hover:translate-x-0.5
-                                        group-hover:-translate-y-0.5
-                                    "
-                                ></i>
-                
-                            </div>
-                
-                        </div>
-                
-                
-                
-                        <!-- CONTEÚDO -->
-                
-                        <div
-                            class="
-                                relative
-                                mt-8
-                                flex-1
-                            "
-                        >
-                
-                            <h3
-                                class="
-                                    text-lg
-                                    md:text-xl
-                
-                                    font-bold
-                
-                                    text-white
-                
-                                    group-hover:text-orange-300
-                
-                                    transition-colors
-                                    duration-300
-                                "
-                            >
-                                ${module.title}
-                            </h3>
-                
-                
-                            <p
-                                class="
-                                    text-sm
-                                    text-slate-500
-                
-                                    leading-6
-                
-                                    mt-2
-                                "
-                            >
-                                ${module.description}
-                            </p>
-                
-                        </div>
-                
-                
-                
-                        <!-- RODAPÉ -->
-                
-                        <div
-                            class="
-                                relative
-                
-                                flex
-                                items-center
-                                justify-between
-                
-                                mt-7
-                                pt-4
-                
-                                border-t
-                                border-[#18201B]
-                            "
-                        >
-                
-                            <span
-                                class="
-                                    text-[10px]
-                                    uppercase
-                                    tracking-[0.2em]
-                
-                                    text-slate-700
-                
-                                    group-hover:text-orange-300/60
-                
-                                    transition
-                                "
-                            >
-                                Módulo
-                            </span>
-                
-                
-                            <span
-                                class="
-                                    text-xs
-                                    font-semibold
-                
-                                    text-slate-600
-                
-                                    group-hover:text-slate-300
-                
-                                    transition
-                                "
-                            >
-                                Acessar
-                            </span>
-                
-                        </div>
-                
-                    </a>
-                
-                `;
-
-            });
-
-        lucide.createIcons();
-
-        document
-            .querySelectorAll('[data-action="change-store"]')
-            .forEach(button => {
-        
-                button.addEventListener("click", async (event) => {
-        
-                    event.preventDefault();
-        
-                    await changeStore();
-        
-                });
-        
-            });
-
+    if (page === 'dashboard') {
+      loadDashboard();
+      return;
     }
 
-    catch (error) {
+    // Os módulos serão conectados às respectivas telas nas próximas etapas.
+    showMessage(
+      `A área "${details.title}" está sendo preparada. A navegação será conectada quando o módulo estiver pronto.`,
+      'success'
+    );
+  }
 
-        console.error("Erro ao iniciar menu:", error);
+  function setupNavigation() {
+    document.querySelectorAll('[data-page]').forEach((button) => {
+      button.addEventListener('click', () => {
+        navigate(button.dataset.page);
+      });
+    });
+  }
 
-        alert(error.message);
+  async function logout() {
+    const button = $('logoutButton');
 
+    if (button) button.disabled = true;
+
+    try {
+      const { error } = await supabase.auth.signOut();
+
+      if (error) throw error;
+
+      window.NekkoStorage?.clear?.();
+
+      window.location.replace('../login/login.html');
+    } catch (error) {
+      console.error('[NEKKO WD] Erro ao sair:', error);
+
+      showMessage(
+        'Não foi possível encerrar a sessão. Tente novamente.'
+      );
+
+      if (button) button.disabled = false;
+    }
+  }
+
+  async function init() {
+    if (!supabase || !window.NekkoBootstrap || !window.NekkoAuth) {
+      showMessage(
+        'Os componentes do sistema não foram carregados. Atualize a página.'
+      );
+      return;
     }
 
-});
+    setupNavigation();
+
+    $('logoutButton')?.addEventListener('click', logout);
+
+    try {
+      const ready = await loadContext();
+
+      if (!ready) return;
+
+      await loadDashboard();
+    } catch (error) {
+      console.error('[NEKKO WD] Erro ao inicializar o painel:', error);
+
+      showMessage(
+        'Não foi possível inicializar o painel. Verifique sua conexão e as permissões de acesso.'
+      );
+    }
+  }
+
+  init();
+})();
