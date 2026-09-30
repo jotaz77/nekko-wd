@@ -1,1 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Entrar | NEKKO WD</title>
+  <meta
+    name="description"
+    content="Acesse o NEKKO WD e gerencie sua marcenaria."
+  >
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            nekko: {
+              orange: '#C65A16',
+              light: '#F28A3D',
+              dark: '#8F3D0D',
+              background: '#090909',
+              surface: '#111111',
+              border: '#292929'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background: #090909;
+      color: #F5F5F5;
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+    }
+
+    input {
+      color-scheme: dark;
+    }
+
+    .input-field {
+      width: 100%;
+      background: #090909;
+      border: 1px solid #292929;
+      border-radius: 10px;
+      padding: 13px 14px;
+      color: #F5F5F5;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .input-field:focus {
+      border-color: #F28A3D;
+    }
+
+    .primary-button {
+      background: #C65A16;
+      color: white;
+      border-radius: 10px;
+      padding: 13px 16px;
+      font-weight: 700;
+      transition: background .2s;
+    }
+
+    .primary-button:hover {
+      background: #8F3D0D;
+    }
+
+    .primary-button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-5">
+
+  <main class="w-full max-w-md">
+
+    <header class="text-center mb-8">
+      <div
+        class="mx-auto mb-4 flex h-16 w-16 items-center justify-center
+               rounded-2xl border border-nekko-orange/40
+               bg-nekko-orange/10"
+      >
+        <span class="text-3xl font-black text-nekko-light">N</span>
+      </div>
+
+      <h1 class="text-3xl font-black tracking-tight">
+        NEKKO <span class="text-nekko-light">WD</span>
+      </h1>
+
+      <p class="mt-2 text-sm text-neutral-400">
+        Gestão inteligente para sua marcenaria.
+      </p>
+    </header>
+
+    <section class="rounded-2xl border border-nekko-border
+                    bg-nekko-surface p-6 sm:p-8">
+
+      <div class="mb-6">
+        <h2 class="text-xl font-bold">Entrar na sua conta</h2>
+        <p class="mt-1 text-sm text-neutral-400">
+          Informe seus dados para continuar.
+        </p>
+      </div>
+
+      <div
+        id="message"
+        role="status"
+        aria-live="polite"
+        class="hidden mb-4 rounded-lg p-3 text-sm"
+      ></div>
+
+      <form id="loginForm" class="space-y-5">
+
+        <div>
+          <label
+            for="email"
+            class="mb-2 block text-sm font-medium"
+          >
+            E-mail
+          </label>
+
+          <input
+            id="email"
+            name="email"
+            type="email"
+            class="input-field"
+            placeholder="voce@marcenaria.com.br"
+            autocomplete="email"
+            required
+          >
+        </div>
+
+        <div>
+          <label
+            for="password"
+            class="mb-2 block text-sm font-medium"
+          >
+            Senha
+          </label>
+
+          <input
+            id="password"
+            name="password"
+            type="password"
+            class="input-field"
+            placeholder="Digite sua senha"
+            autocomplete="current-password"
+            minlength="8"
+            required
+          >
+        </div>
+
+        <div class="flex justify-end">
+          <button
+            id="forgotPassword"
+            type="button"
+            class="text-sm text-nekko-light hover:underline"
+          >
+            Esqueci minha senha
+          </button>
+        </div>
+
+        <button
+          id="loginButton"
+          type="submit"
+          class="primary-button w-full"
+        >
+          Entrar
+        </button>
+
+      </form>
+
+      <div class="my-6 border-t border-nekko-border"></div>
+
+      <p class="text-center text-sm text-neutral-400">
+        Ainda não tem uma conta?
+        <button
+          id="showSignup"
+          type="button"
+          class="font-semibold text-nekko-light hover:underline"
+        >
+          Criar conta
+        </button>
+      </p>
+
+    </section>
+
+    <footer class="mt-6 text-center text-xs text-neutral-600">
+      NEKKO APP · NEKKO WD
+    </footer>
+
+  </main>
+
+  <!-- Dependências: carregar nesta ordem. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../assets/js/config.js"></script>
+  <script src="../../assets/js/supabase.js"></script>
+  <script src="../../assets/js/auth.js"></script>
+  <script src="login.js"></script>
+
+</body>
+</html>
