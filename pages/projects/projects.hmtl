@@ -1,1 +1,418 @@
+<!doctype html>
+<html lang="pt-BR">
 
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#090909">
+    <title>Projetos | NEKKO WD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: #090909;
+            color: #f5f5f5;
+            font-family: Inter, system-ui, sans-serif
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: #090909;
+            border: 1px solid #292929;
+            border-radius: 10px;
+            padding: 11px 12px;
+            color: #f5f5f5;
+            outline: none
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #c65a16
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #686868
+        }
+
+        select option {
+            background: #111;
+            color: #fff
+        }
+
+        .panel {
+            background: #111;
+            border: 1px solid #292929;
+            border-radius: 15px
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 7px;
+            color: #b5b5b5;
+            font-size: 12px;
+            font-weight: 600
+        }
+
+        .primary {
+            background: #c65a16;
+            color: #fff
+        }
+
+        .primary:hover {
+            background: #a9480e
+        }
+
+        .primary:disabled {
+            opacity: .55
+        }
+
+        .section-icon {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border-radius: 10px;
+            background: #2c1a10;
+            color: #f28a3d;
+            flex-shrink: 0
+        }
+
+        .tool {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border: 1px solid #292929;
+            border-radius: 9px;
+            padding: 9px 12px;
+            color: #ddd;
+            font-size: 12px;
+            font-weight: 600
+        }
+
+        .tool.active {
+            border-color: #c65a16;
+            background: #2c1a10;
+            color: #f28a3d
+        }
+
+        .canvas-wrap {
+            overflow: hidden;
+            border: 1px solid #383838;
+            border-radius: 12px;
+            background: #f8f7f3;
+            background-image: radial-gradient(#d6d3cc 1px, transparent 1px);
+            background-size: 18px 18px
+        }
+
+        #sketchCanvas {
+            display: block;
+            width: 100%;
+            height: 350px;
+            touch-action: none;
+            cursor: crosshair
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700
+        }
+
+        .QUOTE,
+        .PENDING {
+            background: #332713;
+            color: #f3c969
+        }
+
+        .IN_PROGRESS {
+            background: #172c3e;
+            color: #79c1ff
+        }
+
+        .COMPLETED,
+        .DELIVERED {
+            background: #173524;
+            color: #72d99a
+        }
+
+        .CANCELLED {
+            background: #391d1d;
+            color: #f28b82
+        }
+
+        @media(max-width:640px) {
+            #sketchCanvas {
+                height: 290px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="sticky top-0 z-20 border-b border-[#292929] bg-[#090909]/95">
+        <div class="mx-auto flex max-w-[1450px] items-center justify-between gap-3 px-4 py-4">
+            <div class="flex items-center gap-3"><a href="index.html"
+                    class="grid h-10 w-10 place-items-center rounded-xl border border-[#292929] text-[#F28A3D]"><i
+                        data-lucide="arrow-left"></i></a>
+                <div>
+                    <div class="text-xs font-bold tracking-widest text-[#F28A3D]">NEKKO WD</div>
+                    <h1 class="text-xl font-bold">Projetos e serviços</h1>
+                </div>
+            </div><button id="newTop"
+                class="primary flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold"><i
+                    data-lucide="plus"></i><span>Novo projeto</span></button>
+        </div>
+    </header>
+    <main class="mx-auto max-w-[1450px] space-y-6 px-4 py-6">
+        <section class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <div class="panel p-4">
+                <p class="text-xs text-gray-400">Total de projetos</p>
+                <p id="total" class="mt-3 text-2xl font-bold">—</p>
+            </div>
+            <div class="panel p-4">
+                <p class="text-xs text-gray-400">Em andamento</p>
+                <p id="progress" class="mt-3 text-2xl font-bold">—</p>
+            </div>
+            <div class="panel p-4">
+                <p class="text-xs text-gray-400">Pendentes</p>
+                <p id="pending" class="mt-3 text-2xl font-bold">—</p>
+            </div>
+            <div class="panel p-4">
+                <p class="text-xs text-gray-400">Valor estimado</p>
+                <p id="revenue" class="mt-3 break-words text-xl font-bold">—</p>
+            </div>
+        </section>
+        <section id="formSection" class="panel hidden overflow-hidden">
+            <div class="flex items-center justify-between border-b border-[#292929] p-5">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-[#F28A3D]">Cadastro</p>
+                    <h2 id="formTitle" class="mt-1 text-lg font-bold">Novo projeto</h2>
+                </div><button id="close" type="button" aria-label="Fechar"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form" class="space-y-6 p-5"><input type="hidden" id="projectId">
+                <section>
+                    <div class="mb-4 flex items-center gap-3"><span class="section-icon"><i
+                                data-lucide="user-round"></i></span>
+                        <div>
+                            <h3 class="font-bold">Cliente e serviço</h3>
+                            <p class="text-xs text-gray-500">Identificação do pedido</p>
+                        </div>
+                    </div>
+                    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        <div><label class="label" for="clientId">Cliente</label><select id="clientId">
+                                <option value="">Sem cliente vinculado</option>
+                            </select></div>
+                        <div><label class="label" for="title">Nome do projeto *</label><input id="title" required
+                                maxlength="150" placeholder="Ex.: Cozinha planejada"></div>
+                        <div><label class="label" for="service">Serviço</label><input id="service"
+                                placeholder="Fabricação e instalação"></div>
+                        <div><label class="label" for="environment">Ambiente</label><select id="environment">
+                                <option value="">Selecione</option>
+                                <option>Cozinha</option>
+                                <option>Sala de estar</option>
+                                <option>Sala de jantar</option>
+                                <option>Quarto</option>
+                                <option>Banheiro</option>
+                                <option>Lavanderia</option>
+                                <option>Escritório</option>
+                                <option>Área gourmet</option>
+                                <option>Comercial</option>
+                                <option>Outro</option>
+                            </select></div>
+                        <div><label class="label" for="status">Status</label><select id="status">
+                                <option value="QUOTE">Orçamento</option>
+                                <option value="PENDING">Pendente</option>
+                                <option value="IN_PROGRESS">Em andamento</option>
+                                <option value="COMPLETED">Concluído</option>
+                                <option value="DELIVERED">Entregue</option>
+                                <option value="CANCELLED">Cancelado</option>
+                            </select></div>
+                        <div><label class="label" for="deadline">Prazo estimado</label><input id="deadline" type="date">
+                        </div>
+                    </div>
+                </section>
+                <section class="border-t border-[#292929] pt-6">
+                    <div class="mb-4 flex items-center gap-3"><span class="section-icon"><i
+                                data-lucide="ruler"></i></span>
+                        <h3 class="font-bold">Medidas (mm)</h3>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        <div><label class="label" for="width">Largura</label><input id="width" type="number" min="0"
+                                step=".01"></div>
+                        <div><label class="label" for="length">Comprimento</label><input id="length" type="number"
+                                min="0" step=".01"></div>
+                        <div><label class="label" for="height">Altura</label><input id="height" type="number" min="0"
+                                step=".01"></div>
+                        <div><label class="label" for="area">Área (m²)</label><input id="area" type="number" min="0"
+                                step=".01"><button id="calcArea" type="button"
+                                class="mt-2 text-xs text-[#F28A3D]">Calcular largura × comprimento</button></div>
+                    </div>
+                </section>
+                <section class="border-t border-[#292929] pt-6">
+                    <div class="mb-4 flex items-center gap-3"><span class="section-icon"><i
+                                data-lucide="panels-top-left"></i></span>
+                        <h3 class="font-bold">Materiais</h3>
+                    </div>
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <div><label class="label" for="material">Tipo de material</label><select id="material">
+                                <option value="">Selecione</option>
+                                <option>MDF</option>
+                                <option>MDP</option>
+                                <option>Madeira maciça</option>
+                                <option>Compensado</option>
+                                <option>Outro</option>
+                            </select></div>
+                        <div><label class="label" for="color">Cor / acabamento</label><input id="color"
+                                placeholder="Ex.: Carvalho, branco TX"></div>
+                        <div><label class="label" for="thickness">Espessura (mm)</label><input id="thickness"
+                                type="number" min="0" step=".1"></div>
+                    </div>
+                </section>
+                <section class="border-t border-[#292929] pt-6">
+                    <div class="mb-4 flex items-center gap-3"><span class="section-icon"><i
+                                data-lucide="pencil-ruler"></i></span>
+                        <div>
+                            <h3 class="font-bold">Desenho do projeto</h3>
+                            <p class="text-xs text-gray-500">Desenhe com mouse ou toque. O rascunho será salvo junto ao
+                                projeto.</p>
+                        </div>
+                    </div>
+                    <div class="mb-3 flex flex-wrap gap-2"><button type="button" class="tool active" data-tool="pen"><i
+                                data-lucide="pencil"></i>Lápis</button><button type="button" class="tool"
+                            data-tool="eraser"><i data-lucide="eraser"></i>Borracha</button><button type="button"
+                            id="undo" class="tool"><i data-lucide="undo-2"></i>Desfazer</button><button type="button"
+                            id="clear" class="tool"><i data-lucide="trash-2"></i>Limpar</button></div>
+                    <div class="mb-3 flex flex-wrap items-center gap-4">
+                        <div class="flex items-center gap-2"><label class="text-xs text-gray-400"
+                                for="colorPicker">Cor</label><input id="colorPicker" class="!w-10 !p-1" type="color"
+                                value="#202020"></div>
+                        <div class="flex flex-1 items-center gap-3"><label class="text-xs text-gray-400"
+                                for="strokeWidth">Espessura</label><input id="strokeWidth" type="range" min="1" max="12"
+                                value="3" class="!p-0 !accent-[#C65A16]"><span id="widthValue" class="text-xs">3</span>
+                        </div>
+                    </div>
+                    <div class="canvas-wrap"><canvas id="sketchCanvas" aria-label="Área de desenho do projeto"></canvas>
+                    </div>
+                    <div class="mt-3 flex justify-between gap-2">
+                        <p class="text-xs text-gray-500">Rascunho interno; não vai para notas.</p><span id="sketchState"
+                            class="text-xs text-gray-500">Nenhum desenho salvo</span>
+                    </div>
+                </section>
+                <section class="border-t border-[#292929] pt-6">
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div><label class="label" for="estimated">Valor estimado (R$)</label><input id="estimated"
+                                type="number" min="0" step=".01" value="0"></div>
+                        <div><label class="label" for="final">Valor final (R$)</label><input id="final" type="number"
+                                min="0" step=".01" placeholder="Opcional"></div>
+                        <div class="md:col-span-2"><label class="label" for="description">Descrição do
+                                projeto</label><textarea id="description" rows="3" maxlength="5000"
+                                placeholder="O que será produzido, ferragens e acabamentos..."></textarea></div>
+                        <div class="md:col-span-2"><label class="label" for="notes">Observações
+                                internas</label><textarea id="notes" rows="2" maxlength="5000"></textarea></div>
+                    </div>
+                </section>
+                <div id="formMessage" class="hidden rounded-xl border p-3 text-sm" role="status"></div>
+                <div class="flex flex-col-reverse gap-3 border-t border-[#292929] pt-5 sm:flex-row sm:justify-end">
+                    <button id="cancel" type="button"
+                        class="rounded-xl border border-[#292929] px-5 py-3 text-sm">Cancelar</button><button id="save"
+                        type="submit" class="primary rounded-xl px-6 py-3 text-sm font-bold">Salvar projeto</button>
+                </div>
+            </form>
+        </section>
+        <section class="space-y-4">
+            <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <div>
+                    <h2 class="text-lg font-bold">Projetos cadastrados</h2>
+                    <p class="text-sm text-gray-500">Acompanhe os serviços da marcenaria.</p>
+                </div>
+                <div class="flex flex-col gap-3 sm:flex-row"><input id="search"
+                        placeholder="Buscar projeto ou cliente..."><select id="filter">
+                        <option value="">Todos os status</option>
+                        <option value="QUOTE">Orçamento</option>
+                        <option value="PENDING">Pendente</option>
+                        <option value="IN_PROGRESS">Em andamento</option>
+                        <option value="COMPLETED">Concluído</option>
+                        <option value="DELIVERED">Entregue</option>
+                        <option value="CANCELLED">Cancelado</option>
+                    </select></div>
+            </div>
+            <div id="pageMessage" class="hidden rounded-xl border p-4 text-sm" role="status"></div>
+            <div id="list" class="grid gap-4 xl:grid-cols-2">
+                <div class="panel p-8 text-center text-sm text-gray-500">Carregando projetos...</div>
+            </div>
+            <div id="empty" class="panel hidden p-10 text-center">
+                <h3 class="font-bold">Nenhum projeto encontrado</h3>
+                <p class="mt-2 text-sm text-gray-500">Cadastre um projeto ou altere os filtros.</p><button id="newEmpty"
+                    class="primary mt-4 rounded-xl px-5 py-3">Cadastrar projeto</button>
+            </div>
+        </section>
+        <footer class="border-t border-[#292929] py-5 text-center text-xs text-gray-600">NEKKO WD · Gestão inteligente
+            para marcenarias</footer>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/supabase.js"></script>
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/roles.js"></script>
+    <script src="../../assets/js/bootstrap.js"></script>
+    <script>
+        lucide.createIcons();
+        (() => {
+            'use strict';
+            const $ = id => document.getElementById(id), labels = {QUOTE: 'Orçamento', PENDING: 'Pendente', IN_PROGRESS: 'Em andamento', COMPLETED: 'Concluído', DELIVERED: 'Entregue', CANCELLED: 'Cancelado'}, money = new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'});
+            let user = null, ctx = null, projects = [], clients = [], editId = null, busy = false, strokes = [], activeStroke = null, tool = 'pen', ctx2d = null, resizeObserver = null;
+            const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+            const num = v => v === '' || v == null ? null : (Number.isFinite(Number(v)) ? Number(v) : null);
+            function message(el, text, ok = false) {el.textContent = text; el.className = 'rounded-xl border p-3 text-sm ' + (ok ? 'border-green-900 bg-green-950/40 text-green-300' : 'border-red-900 bg-red-950/40 text-red-300');}
+            function hide(el) {el.classList.add('hidden'); el.textContent = '';}
+            function scope(q) {return ctx?.store_id ? q.eq('store_id', ctx.store_id) : q;}
+            function draw() {const c = $('sketchCanvas'); if (!ctx2d || !c) return; ctx2d.clearRect(0, 0, c.width, c.height); for (const s of strokes) {if (!s.points?.length) continue; ctx2d.save(); ctx2d.lineCap = 'round'; ctx2d.lineJoin = 'round'; ctx2d.globalCompositeOperation = s.tool === 'eraser' ? 'destination-out' : 'source-over'; ctx2d.strokeStyle = s.tool === 'eraser' ? '#000' : (s.color || '#202020'); ctx2d.lineWidth = (Number(s.width) || 3) * (devicePixelRatio || 1); ctx2d.beginPath(); ctx2d.moveTo(s.points[0].x * c.width, s.points[0].y * c.height); if (s.points.length === 1) ctx2d.lineTo(s.points[0].x * c.width + .5, s.points[0].y * c.height + .5); else s.points.slice(1).forEach(p => ctx2d.lineTo(p.x * c.width, p.y * c.height)); ctx2d.stroke(); ctx2d.restore();} }
+            function resize() {const c = $('sketchCanvas'), r = c.getBoundingClientRect(); if (!r.width || !r.height) return; const w = Math.round(r.width * (devicePixelRatio || 1)), h = Math.round(r.height * (devicePixelRatio || 1)); if (c.width === w && c.height === h && ctx2d) return; c.width = w; c.height = h; ctx2d = c.getContext('2d'); draw();}
+            function sketchLoad(p) {strokes = Array.isArray(p?.sketch_data?.strokes) ? JSON.parse(JSON.stringify(p.sketch_data.strokes)) : []; activeStroke = null; $('sketchState').textContent = strokes.length ? 'Desenho carregado' : 'Nenhum desenho salvo'; draw();}
+            function dirty() {$('sketchState').textContent = 'Desenho alterado — salve o projeto';}
+            function initCanvas() {
+                const c = $('sketchCanvas'); c.addEventListener('pointerdown', e => {if (busy || !ctx) return; e.preventDefault(); const r = c.getBoundingClientRect(); activeStroke = {tool: document.querySelector('[data-tool].active')?.dataset.tool || 'pen', color: $('colorPicker').value, width: Number($('strokeWidth').value) || 3, points: [{x: Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)), y: Math.max(0, Math.min(1, (e.clientY - r.top) / r.height))}]}; strokes.push(activeStroke); c.setPointerCapture(e.pointerId); dirty(); draw();}); c.addEventListener('pointermove', e => {if (!activeStroke) return; const r = c.getBoundingClientRect(); activeStroke.points.push({x: Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)), y: Math.max(0, Math.min(1, (e.clientY - r.top) / r.height))}); draw();});['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => c.addEventListener(ev, () => {activeStroke = null;}));
+                document.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => {tool = b.dataset.tool; document.querySelectorAll('[data-tool]').forEach(x => x.classList.toggle('active', x === b));});
+                document.querySelectorAll('[data-tool]').forEach(b => b.addEventListener('click', () => {tool = b.dataset.tool;/* selected tool is read below */}));
+                $('undo').onclick = () => {if (strokes.length) {strokes.pop(); dirty(); draw();} }; $('clear').onclick = () => {if (strokes.length && confirm('Apagar todo o desenho deste projeto?')) {strokes = []; activeStroke = null; dirty(); draw();} }; $('strokeWidth').oninput = () => $('widthValue').textContent = $('strokeWidth').value;
+                const originalDown = c.onpointerdown; c.addEventListener('pointerdown', () => { }); resizeObserver = new ResizeObserver(resize); resizeObserver.observe(c); resize();
+            }
+            async function loadClients() {let q = scope(window.supabaseClient.from('clients').select('id,name').eq('company_id', ctx.company_id).order('name')); const {data, error} = await q.limit(500); if (error) throw error; clients = data || []; $('clientId').innerHTML = '<option value="">Sem cliente vinculado</option>' + clients.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');}
+            async function loadProjects() {let q = scope(window.supabaseClient.from('woodworking_projects').select('id,project_number,client_id,title,service_name,environment_type,status,width_mm,length_mm,height_mm,area_m2,material_type,material_color,material_thickness_mm,estimated_value,final_value,deadline,description,notes,sketch_data,created_at').eq('company_id', ctx.company_id).order('created_at', {ascending: false})); const {data, error} = await q.limit(500); if (error) throw error; projects = data || []; stats(); render();}
+            function stats() {$('total').textContent = projects.length; $('progress').textContent = projects.filter(p => p.status === 'IN_PROGRESS').length; $('pending').textContent = projects.filter(p => p.status === 'PENDING').length; $('revenue').textContent = money.format(projects.filter(p => p.status !== 'CANCELLED').reduce((s, p) => s + Number(p.estimated_value || 0), 0));}
+            function clientName(id) {return clients.find(c => c.id === id)?.name || 'Cliente não vinculado';}
+            function render() {const term = $('search').value.trim().toLocaleLowerCase('pt-BR'), filter = $('filter').value; const rows = projects.filter(p => (!filter || p.status === filter) && (!term || [p.title, p.service_name, clientName(p.client_id), p.project_number].some(v => String(v || '').toLocaleLowerCase('pt-BR').includes(term)))); $('empty').classList.toggle('hidden', rows.length > 0); $('list').innerHTML = rows.map(p => `<article class="panel p-5"><div class="flex items-start justify-between gap-3"><div><p class="text-xs text-gray-500">#${esc(p.project_number || '—')}</p><h3 class="mt-1 font-bold">${esc(p.title)}</h3><p class="mt-1 text-sm text-gray-400">${esc(clientName(p.client_id))}</p></div><span class="badge ${esc(p.status)}">${esc(labels[p.status] || p.status)}</span></div><div class="mt-4 grid grid-cols-2 gap-4 border-y border-[#292929] py-4"><div><p class="text-xs text-gray-500">Ambiente / serviço</p><p class="mt-1 text-sm">${esc(p.environment_type || p.service_name || 'Não informado')}</p></div><div><p class="text-xs text-gray-500">Valor</p><p class="mt-1 font-bold text-[#F28A3D]">${esc(money.format(p.final_value ?? p.estimated_value ?? 0))}</p></div><div><p class="text-xs text-gray-500">Prazo</p><p class="mt-1 text-sm">${esc(p.deadline ? String(p.deadline).split('-').reverse().join('/') : 'Não definido')}</p></div><div><p class="text-xs text-gray-500">Área</p><p class="mt-1 text-sm">${p.area_m2 == null ? 'Não informada' : esc(p.area_m2) + ' m²'}</p></div></div>${p.material_type || p.material_color ? `<p class="mt-3 text-sm text-gray-400">${esc([p.material_type, p.material_color, p.material_thickness_mm ? `${p.material_thickness_mm} mm` : null].filter(Boolean).join(' · '))}</p>` : ''}${p.sketch_data?.strokes?.length ? '<p class="mt-3 text-xs text-[#F28A3D]">✎ Desenho salvo</p>' : ''}${p.description ? `<p class="mt-3 text-sm text-gray-400">${esc(p.description)}</p>` : ''}<div class="mt-4 flex gap-2"><button class="tool" data-edit="${esc(p.id)}">Editar</button><button class="tool" data-status="${esc(p.id)}">Alterar status</button></div></article>`).join(''); lucide.createIcons();}
+            function openForm(p = null) {editId = p?.id || null; $('form').reset(); hide($('formMessage')); $('formTitle').textContent = p ? 'Editar projeto' : 'Novo projeto'; $('save').textContent = p ? 'Salvar alterações' : 'Salvar projeto'; if (p) {const map = {clientId: 'client_id', title: 'title', service: 'service_name', environment: 'environment_type', status: 'status', deadline: 'deadline', width: 'width_mm', length: 'length_mm', height: 'height_mm', area: 'area_m2', material: 'material_type', color: 'material_color', thickness: 'material_thickness_mm', estimated: 'estimated_value', final: 'final_value', description: 'description', notes: 'notes'}; for (const [id, key] of Object.entries(map)) $(id).value = p[key] ?? '';} sketchLoad(p); $('formSection').classList.remove('hidden'); requestAnimationFrame(resize); $('formSection').scrollIntoView({behavior: 'smooth'});}
+            function closeForm() {if ($('sketchState').textContent.includes('alterado') && !confirm('O desenho não foi salvo. Fechar mesmo assim?')) return; $('formSection').classList.add('hidden'); $('form').reset(); editId = null; sketchLoad(null);}
+            async function save(e) {
+                e.preventDefault(); if (busy) return; if (!$('title').value.trim()) {message($('formMessage'), 'Informe o nome do projeto.'); return;} for (const id of ['width', 'length', 'height', 'area', 'thickness', 'estimated', 'final']) if ($(id).value !== '' && (!Number.isFinite(Number($(id).value)) || Number($(id).value) < 0)) {message($('formMessage'), `Verifique o campo ${id}: informe um número igual ou maior que zero.`); return;}
+                busy = true; $('save').disabled = true; $('save').textContent = 'Salvando...';
+                const payload = {company_id: ctx.company_id, store_id: ctx.store_id || null, client_id: $('clientId').value || null, title: $('title').value.trim(), service_name: $('service').value.trim() || null, environment_type: $('environment').value || null, status: $('status').value, width_mm: num($('width').value), length_mm: num($('length').value), height_mm: num($('height').value), area_m2: num($('area').value), material_type: $('material').value || null, material_color: $('color').value.trim() || null, material_thickness_mm: num($('thickness').value), estimated_value: num($('estimated').value) ?? 0, final_value: num($('final').value), deadline: $('deadline').value || null, description: $('description').value.trim() || null, notes: $('notes').value.trim() || null, sketch_data: {version: 1, strokes: JSON.parse(JSON.stringify(strokes))}};
+                if (!editId) payload.created_by = user.id;
+                try {let r = editId ? await window.supabaseClient.from('woodworking_projects').update(payload).eq('id', editId).eq('company_id', ctx.company_id).select('id').maybeSingle() : await window.supabaseClient.from('woodworking_projects').insert(payload).select('id').single(); if (r.error) throw r.error; if (!r.data) throw new Error('Nenhum registro foi atualizado. Verifique as permissões do Supabase.'); $('sketchState').textContent = strokes.length ? 'Desenho salvo no projeto' : 'Projeto salvo sem desenho'; message($('formMessage'), editId ? 'Projeto atualizado!' : 'Projeto cadastrado! ', true); await loadProjects(); setTimeout(() => {$('formSection').classList.add('hidden'); editId = null; hide($('formMessage'));}, 650);} catch (err) {console.error(err); message($('formMessage'), err?.message || 'Não foi possível salvar. Verifique a conexão e as políticas RLS.');} finally {busy = false; $('save').disabled = false; $('save').textContent = editId ? 'Salvar alterações' : 'Salvar projeto';}
+            }
+            async function changeStatus(p) {const v = prompt('Digite o status:\n' + Object.entries(labels).map(([k, v]) => `${k} = ${v}`).join('\n'), p.status); if (v === null) return; const s = v.trim().toUpperCase(); if (!labels[s]) {alert('Status inválido.'); return;} const {error} = await window.supabaseClient.from('woodworking_projects').update({status: s}).eq('id', p.id).eq('company_id', ctx.company_id); if (error) alert(error.message); else await loadProjects();}
+            async function init() {try {const {data, error} = await window.supabaseClient.auth.getSession(); if (error) throw error; if (!data.session) {location.href = '../login/login.html'; return;} user = data.session.user; const r = await window.NekkoBootstrap.init(); if (!r || r.status !== 'ready' || !r.context) {location.href = r?.status === 'no_store' ? '../onboarding/stores.html' : '../onboarding/company.html'; return;} ctx = r.context; if (!ctx.company_id) throw Error('Empresa ativa não identificada.'); await Promise.all([loadClients(), loadProjects()]);} catch (e) {console.error(e); message($('pageMessage'), e.message || 'Erro ao carregar projetos.');} }
+            $('newTop').onclick = () => openForm(); $('newEmpty').onclick = () => openForm(); $('close').onclick = closeForm; $('cancel').onclick = closeForm; $('form').addEventListener('submit', save); $('search').oninput = render; $('filter').onchange = render;
+            $('calcArea').onclick = () => {const w = num($('width').value), l = num($('length').value); if (!w || !l) {message($('formMessage'), 'Informe largura e comprimento maiores que zero.'); return;} $('area').value = ((w / 1000) * (l / 1000)).toFixed(2); hide($('formMessage'));};
+            $('list').addEventListener('click', e => {const a = e.target.closest('[data-edit]'), b = e.target.closest('[data-status]'); if (a) {const p = projects.find(x => x.id === a.dataset.edit); if (p) openForm(p);} if (b) {const p = projects.find(x => x.id === b.dataset.status); if (p) changeStatus(p);} });
+            initCanvasFix(); init();
+            function initCanvasFix() {initCanvas(); const c = $('sketchCanvas'); c.addEventListener('pointerdown', () => {tool = document.querySelector('[data-tool].active')?.dataset.tool || 'pen'; if (activeStroke) activeStroke.tool = tool;});}
+        })();
+    </script>
+</body>
+
+</html>
