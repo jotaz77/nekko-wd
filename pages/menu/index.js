@@ -1,6 +1,6 @@
 
 /**
- * NEKKO WD — Lógica do painel principal
+ * NEKKO WOOD — Lógica do painel principal
  * Carrega os dados da empresa e da unidade ativa.
  */
 (() => {
@@ -449,7 +449,7 @@
         loadRecentProjects()
       ]);
     } catch (error) {
-      console.error('[NEKKO WD] Erro ao carregar o painel:', error);
+      console.error('[NEKKO WOOD] Erro ao carregar o painel:', error);
       showMessage(
         'Não foi possível carregar todos os indicadores. Verifique as permissões RLS do Supabase e tente atualizar a página.'
       );
@@ -509,7 +509,7 @@
 
       window.location.replace('../login/login.html');
     } catch (error) {
-      console.error('[NEKKO WD] Erro ao sair:', error);
+      console.error('[NEKKO WOOD] Erro ao sair:', error);
 
       showMessage(
         'Não foi possível encerrar a sessão. Tente novamente.'
@@ -538,7 +538,7 @@
 
       await loadDashboard();
     } catch (error) {
-      console.error('[NEKKO WD] Erro ao inicializar o painel:', error);
+      console.error('[NEKKO WOOD] Erro ao inicializar o painel:', error);
 
       showMessage(
         'Não foi possível inicializar o painel. Verifique sua conexão e as permissões de acesso.'
