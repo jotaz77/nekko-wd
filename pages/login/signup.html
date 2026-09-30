@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090909">
+
+  <title>Criar conta | NEKKO WD</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            nekko: {
+              bg: '#090909',
+              surface: '#111111',
+              border: '#292929',
+              orange: '#C65A16',
+              light: '#F28A3D'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="min-h-screen bg-nekko-bg text-white flex items-center justify-center px-4 py-10">
+
+  <main class="w-full max-w-md">
+
+    <div class="text-center mb-8">
+      <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-nekko-orange/10 border border-nekko-orange/30">
+        <i data-lucide="tree-pine" class="h-9 w-9 text-nekko-light"></i>
+      </div>
+
+      <h1 class="text-3xl font-bold tracking-tight">
+        NEKKO <span class="text-nekko-light">WD</span>
+      </h1>
+
+      <p class="mt-2 text-sm text-gray-400">
+        Comece a organizar sua marcenaria.
+      </p>
+    </div>
+
+    <section class="rounded-2xl border border-nekko-border bg-nekko-surface p-6 sm:p-8 shadow-2xl">
+
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold">Criar sua conta</h2>
+        <p class="mt-1 text-sm text-gray-400">
+          Preencha seus dados para começar.
+        </p>
+      </div>
+
+      <div
+        id="message"
+        class="hidden mb-5 rounded-lg border p-3 text-sm"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <form id="signupForm" class="space-y-4">
+
+        <div>
+          <label for="fullName" class="mb-2 block text-sm font-medium text-gray-300">
+            Nome completo
+          </label>
+
+          <input
+            id="fullName"
+            name="fullName"
+            type="text"
+            autocomplete="name"
+            placeholder="Seu nome completo"
+            required
+            maxlength="120"
+            class="w-full rounded-lg border border-nekko-border bg-black px-4 py-3 text-white outline-none transition focus:border-nekko-orange focus:ring-2 focus:ring-nekko-orange/20"
+          >
+        </div>
+
+        <div>
+          <label for="email" class="mb-2 block text-sm font-medium text-gray-300">
+            E-mail
+          </label>
+
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="voce@exemplo.com"
+            required
+            class="w-full rounded-lg border border-nekko-border bg-black px-4 py-3 text-white outline-none transition focus:border-nekko-orange focus:ring-2 focus:ring-nekko-orange/20"
+          >
+        </div>
+
+        <div>
+          <label for="phone" class="mb-2 block text-sm font-medium text-gray-300">
+            Telefone <span class="text-gray-500">(opcional)</span>
+          </label>
+
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            autocomplete="tel"
+            placeholder="(11) 99999-9999"
+            maxlength="20"
+            class="w-full rounded-lg border border-nekko-border bg-black px-4 py-3 text-white outline-none transition focus:border-nekko-orange focus:ring-2 focus:ring-nekko-orange/20"
+          >
+        </div>
+
+        <div>
+          <label for="password" class="mb-2 block text-sm font-medium text-gray-300">
+            Senha
+          </label>
+
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Mínimo de 8 caracteres"
+            minlength="8"
+            required
+            class="w-full rounded-lg border border-nekko-border bg-black px-4 py-3 text-white outline-none transition focus:border-nekko-orange focus:ring-2 focus:ring-nekko-orange/20"
+          >
+        </div>
+
+        <div>
+          <label for="confirmPassword" class="mb-2 block text-sm font-medium text-gray-300">
+            Confirmar senha
+          </label>
+
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Digite a senha novamente"
+            minlength="8"
+            required
+            class="w-full rounded-lg border border-nekko-border bg-black px-4 py-3 text-white outline-none transition focus:border-nekko-orange focus:ring-2 focus:ring-nekko-orange/20"
+          >
+        </div>
+
+        <button
+          id="signupButton"
+          type="submit"
+          class="flex w-full items-center justify-center gap-2 rounded-lg bg-nekko-orange px-4 py-3 font-semibold text-white transition hover:bg-nekko-light hover:text-black disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <span>Criar minha conta</span>
+          <i data-lucide="arrow-right" class="h-4 w-4"></i>
+        </button>
+
+      </form>
+
+      <div class="mt-6 border-t border-nekko-border pt-5 text-center">
+        <p class="text-sm text-gray-400">
+          Já possui uma conta?
+          <a
+            href="login.html"
+            class="font-semibold text-nekko-light transition hover:text-white"
+          >
+            Fazer login
+          </a>
+        </p>
+      </div>
+
+    </section>
+
+    <p class="mt-6 text-center text-xs text-gray-600">
+      NEKKO WD · Gestão inteligente para marcenarias
+    </p>
+
+  </main>
+
+  <script>
+    lucide.createIcons();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../assets/js/config.js"></script>
+  <script src="../../assets/js/supabase.js"></script>
+  <script src="../../assets/js/auth.js"></script>
+  <script src="signup.js"></script>
+
+</body>
+</html>
