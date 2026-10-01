@@ -88,7 +88,15 @@
   }
 
   async function redirectAfterLogin() {
-    const result = await window.NekkoBootstrap.init();
+    const bootstrap = window.NekkoBootstrap || window.Bootstrap;
+
+    if (!bootstrap || typeof bootstrap.init !== "function") {
+        throw new Error(
+            "Bootstrap não carregado. Verifique o arquivo bootstrap.js e sua inclusão no login.html."
+        );
+    }
+    
+    const result = await bootstrap.init();
 
     if (result.status === 'unauthenticated') {
       showMessage('Sua sessão não foi encontrada. Entre novamente.');
