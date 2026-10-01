@@ -41,37 +41,12 @@
         BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    .sidebar-link {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 14px;
-      border-radius: 10px;
-      color: #999999;
-      font-size: 14px;
-      font-weight: 500;
-      transition: background .2s, color .2s;
-      cursor: pointer;
-      width: 100%;
-      text-align: left;
+    .quick-link {
+      min-height: 142px; border: 1px solid #292929; border-radius: 14px;
+      background: #111111; padding: 18px; text-align: left;
+      transition: border-color .2s, background .2s, transform .2s;
     }
-
-    .sidebar-link:hover {
-      background: #1B1B1B;
-      color: #FFFFFF;
-    }
-
-    .sidebar-link.active {
-      background: rgba(198, 90, 22, .13);
-      color: #F28A3D;
-      border: 1px solid rgba(198, 90, 22, .22);
-    }
-
-    .sidebar-link svg {
-      width: 18px;
-      height: 18px;
-      flex-shrink: 0;
-    }
+    .quick-link:hover { border-color: rgba(198,90,22,.65); background: #17120f; transform: translateY(-2px); }
 
     .surface {
       background: #111111;
@@ -93,163 +68,25 @@
       color: #929292;
     }
 
-    #mobileOverlay {
-      display: none;
-    }
-
-    @media (max-width: 767px) {
-      #sidebar {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 50;
-        width: 270px;
-        transform: translateX(-100%);
-        transition: transform .25s ease;
-      }
-
-      #sidebar.open {
-        transform: translateX(0);
-      }
-
-      #mobileOverlay.open {
-        display: block;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, .7);
-        z-index: 40;
-      }
-
-      #mainContent {
-        margin-left: 0;
-      }
-    }
   </style>
 </head>
 
 <body class="min-h-screen">
 
-  <div id="mobileOverlay"></div>
-
   <div class="min-h-screen">
-
-    <!-- MENU LATERAL -->
-    <aside
-      id="sidebar"
-      class="fixed inset-y-0 left-0 z-30 flex w-[260px] flex-col border-r border-nekko-border bg-nekko-bg"
-    >
-      <!-- LOGO -->
-      <div class="flex h-[76px] items-center gap-3 border-b border-nekko-border px-6">
-        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-nekko-orange">
-          <i data-lucide="boxes" class="h-6 w-6 text-white"></i>
+    <header class="sticky top-0 z-20 border-b border-nekko-border bg-nekko-bg/95 backdrop-blur-md">
+      <div class="mx-auto flex min-h-[76px] max-w-[1600px] items-center justify-between gap-4 px-5 md:px-8">
+        <div class="flex min-w-0 items-center gap-3">
+          <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-nekko-orange"><i data-lucide="hammer" class="h-6 w-6 text-white"></i></div>
+          <div class="min-w-0"><h1 class="truncate text-lg font-black tracking-[0.12em]">NEKKO <span class="text-nekko-light">WOOD</span></h1><p class="text-[10px] uppercase tracking-[0.18em] text-neutral-500">Gestão para marcenarias</p></div>
         </div>
-
-        <div>
-          <h1 class="text-lg font-black tracking-[0.15em]">
-            NEKKO <span class="text-nekko-light">WOOD</span>
-          </h1>
-          <p class="text-[10px] uppercase tracking-[0.2em] text-neutral-500">
-            Gestão para marcenarias
-          </p>
+        <div class="flex min-w-0 items-center gap-3">
+          <div class="hidden text-right sm:block"><p id="headerCompanyName" class="max-w-[220px] truncate text-sm font-semibold">Sua marcenaria</p><p id="headerStoreName" class="text-xs text-neutral-500">Unidade principal</p></div>
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-nekko-border bg-nekko-surface text-nekko-light"><i data-lucide="user-round" class="h-5 w-5"></i></div>
+          <button id="logoutButton" type="button" title="Sair da conta" class="rounded-lg border border-nekko-border p-2 text-neutral-400 transition hover:border-red-500/40 hover:text-red-400"><i data-lucide="log-out" class="h-4 w-4"></i></button>
         </div>
       </div>
-
-      <!-- NAVEGAÇÃO -->
-      <div class="flex-1 overflow-y-auto px-4 py-6">
-
-        <p class="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-600">
-          Principal
-        </p>
-
-        <nav class="space-y-1">
-          <button type="button" class="sidebar-link active" data-page="dashboard">
-            <i data-lucide="layout-dashboard"></i>
-            <span>Visão geral</span>
-          </button>
-
-          <button type="button" class="sidebar-link" data-page="projects">
-            <i data-lucide="clipboard-list"></i>
-            <span>Projetos e serviços</span>
-          </button>
-
-          <button type="button" class="sidebar-link" data-page="clients">
-            <i data-lucide="users"></i>
-            <span>Clientes</span>
-          </button>
-
-          <button type="button" class="sidebar-link" data-page="budgets">
-            <i data-lucide="file-text"></i>
-            <span>Orçamentos</span>
-          </button>
-        </nav>
-
-        <p class="mb-3 mt-8 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-600">
-          Gestão
-        </p>
-
-        <nav class="space-y-1">
-          <button type="button" class="sidebar-link" data-page="materials">
-            <i data-lucide="layers"></i>
-            <span>Materiais e estoque</span>
-          </button>
-
-          <button type="button" class="sidebar-link" data-page="finance">
-            <i data-lucide="wallet"></i>
-            <span>Financeiro</span>
-          </button>
-
-          <button type="button" class="sidebar-link" data-page="reports">
-            <i data-lucide="chart-no-axes-combined"></i>
-            <span>Relatórios</span>
-          </button>
-        </nav>
-
-        <p class="mb-3 mt-8 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-600">
-          Organização
-        </p>
-
-        <nav class="space-y-1">
-          <button type="button" class="sidebar-link" data-page="stores">
-            <i data-lucide="store"></i>
-            <span>Unidades</span>
-          </button>
-
-          <button type="button" class="sidebar-link" data-page="settings">
-            <i data-lucide="settings-2"></i>
-            <span>Configurações</span>
-          </button>
-        </nav>
-      </div>
-
-      <!-- RODAPÉ DO MENU -->
-      <div class="border-t border-nekko-border p-4">
-        <div class="flex items-center gap-3 rounded-xl bg-white/[0.03] p-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-nekko-orange/15 text-nekko-light">
-            <i data-lucide="user-round" class="h-5 w-5"></i>
-          </div>
-
-          <div class="min-w-0 flex-1">
-            <p id="sidebarUserName" class="truncate text-sm font-semibold">
-              Carregando...
-            </p>
-            <p id="sidebarCompanyName" class="truncate text-xs text-neutral-500">
-              Sua marcenaria
-            </p>
-          </div>
-
-          <button
-            id="logoutButton"
-            type="button"
-            title="Sair da conta"
-            class="rounded-lg p-2 text-neutral-500 hover:bg-white/5 hover:text-red-400"
-          >
-            <i data-lucide="log-out" class="h-4 w-4"></i>
-          </button>
-        </div>
-      </div>
-    </aside>
-
+    </header>
     <!-- CONTEÚDO PRINCIPAL -->
     <main id="mainContent" class="min-h-screen md:ml-[260px]">
 
@@ -299,202 +136,32 @@
 
         <!-- BOAS-VINDAS -->
         <section class="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
-          <div>
-            <p class="mb-2 text-sm text-neutral-500">
-              Painel de controle
-            </p>
-
-            <h1 class="text-2xl font-bold md:text-3xl">
-              Olá, <span id="welcomeName" class="text-nekko-light">bem-vindo</span>!
-            </h1>
-
-            <p class="mt-2 max-w-xl text-sm leading-6 text-neutral-400">
-              Gerencie seus projetos, acompanhe seus materiais e organize
-              as operações da sua marcenaria em um só lugar.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            data-page="projects"
-            class="orange-button inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold"
-          >
-            <i data-lucide="plus" class="h-4 w-4"></i>
-            Novo projeto
-          </button>
+          <div><p class="mb-2 text-sm text-neutral-500">Painel de controle</p><h1 class="text-2xl font-bold md:text-3xl">Olá, <span id="welcomeName" class="text-nekko-light">bem-vindo</span>!</h1><p class="mt-2 max-w-xl text-sm leading-6 text-neutral-400">Acompanhe os principais números e acesse rapidamente as áreas da sua marcenaria.</p></div>
+          <button type="button" data-page="projects" class="orange-button inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold"><i data-lucide="plus" class="h-4 w-4"></i> Novo serviço</button>
         </section>
-
-        <!-- INDICADORES -->
         <section class="mb-8">
-          <div class="mb-4 flex items-center justify-between">
-            <h3 class="font-semibold">Resumo da operação</h3>
-            <span class="text-xs text-neutral-500">Dados da unidade ativa</span>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-
-            <article class="surface p-5">
-              <div class="mb-5 flex items-center justify-between">
-                <span class="text-sm text-neutral-400">Projetos ativos</span>
-                <div class="rounded-lg bg-nekko-orange/10 p-2 text-nekko-light">
-                  <i data-lucide="clipboard-list" class="h-5 w-5"></i>
-                </div>
-              </div>
-              <p id="activeProjectsCount" class="text-3xl font-bold">—</p>
-              <p class="mt-2 text-xs text-neutral-500">Projetos em andamento</p>
-            </article>
-
-            <article class="surface p-5">
-              <div class="mb-5 flex items-center justify-between">
-                <span class="text-sm text-neutral-400">Clientes</span>
-                <div class="rounded-lg bg-blue-500/10 p-2 text-blue-400">
-                  <i data-lucide="users" class="h-5 w-5"></i>
-                </div>
-              </div>
-              <p id="clientsCount" class="text-3xl font-bold">—</p>
-              <p class="mt-2 text-xs text-neutral-500">Clientes cadastrados</p>
-            </article>
-
-            <article class="surface p-5">
-              <div class="mb-5 flex items-center justify-between">
-                <span class="text-sm text-neutral-400">Orçamentos</span>
-                <div class="rounded-lg bg-purple-500/10 p-2 text-purple-400">
-                  <i data-lucide="file-text" class="h-5 w-5"></i>
-                </div>
-              </div>
-              <p id="budgetsCount" class="text-3xl font-bold">—</p>
-              <p class="mt-2 text-xs text-neutral-500">Orçamentos registrados</p>
-            </article>
-
-            <article class="surface p-5">
-              <div class="mb-5 flex items-center justify-between">
-                <span class="text-sm text-neutral-400">Materiais</span>
-                <div class="rounded-lg bg-green-500/10 p-2 text-green-400">
-                  <i data-lucide="layers" class="h-5 w-5"></i>
-                </div>
-              </div>
-              <p id="materialsCount" class="text-3xl font-bold">—</p>
-              <p class="mt-2 text-xs text-neutral-500">Itens cadastrados no estoque</p>
-            </article>
-
+          <div class="mb-4 flex items-center justify-between gap-3"><h3 class="font-semibold">Resumo da operação</h3><span class="text-xs text-neutral-500">Dados da unidade ativa</span></div>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <article class="surface p-5"><div class="mb-5 flex items-center justify-between"><span class="text-sm text-neutral-400">Orçamentos</span><div class="rounded-lg bg-nekko-orange/10 p-2 text-nekko-light"><i data-lucide="file-text" class="h-5 w-5"></i></div></div><p id="budgetsCount" class="text-3xl font-bold">—</p><p class="mt-2 text-xs text-neutral-500">Serviços na etapa de orçamento</p></article>
+            <article class="surface p-5"><div class="mb-5 flex items-center justify-between"><span class="text-sm text-neutral-400">Lucro bruto</span><div class="rounded-lg bg-green-500/10 p-2 text-green-400"><i data-lucide="trending-up" class="h-5 w-5"></i></div></div><p id="grossProfit" class="text-3xl font-bold">R$ —</p><p class="mt-2 text-xs text-neutral-500">Resultado bruto dos serviços</p></article>
+            <article class="surface p-5"><div class="mb-5 flex items-center justify-between"><span class="text-sm text-neutral-400">Quantidade de serviços</span><div class="rounded-lg bg-blue-500/10 p-2 text-blue-400"><i data-lucide="clipboard-list" class="h-5 w-5"></i></div></div><p id="activeProjectsCount" class="text-3xl font-bold">—</p><p class="mt-2 text-xs text-neutral-500">Serviços cadastrados</p></article>
           </div>
         </section>
-
-        <!-- FINANCEIRO -->
-        <section class="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
-
-          <article class="surface overflow-hidden">
-            <div class="flex items-center justify-between border-b border-nekko-border p-5">
-              <div>
-                <h3 class="font-semibold">Visão financeira</h3>
-                <p class="mt-1 text-xs text-neutral-500">Resumo dos lançamentos financeiros</p>
-              </div>
-              <div class="rounded-lg bg-nekko-orange/10 p-2 text-nekko-light">
-                <i data-lucide="wallet" class="h-5 w-5"></i>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
-              <div class="rounded-xl border border-nekko-border bg-black/20 p-4">
-                <p class="mb-3 text-sm text-neutral-400">Entradas</p>
-                <p id="financialIncome" class="text-2xl font-bold text-green-400">R$ —</p>
-              </div>
-
-              <div class="rounded-xl border border-nekko-border bg-black/20 p-4">
-                <p class="mb-3 text-sm text-neutral-400">Saídas</p>
-                <p id="financialExpenses" class="text-2xl font-bold text-red-400">R$ —</p>
-              </div>
-            </div>
-
-            <div class="px-5 pb-5">
-              <button
-                type="button"
-                data-page="finance"
-                class="flex w-full items-center justify-between rounded-lg border border-nekko-border px-4 py-3 text-sm text-neutral-300 transition hover:border-nekko-orange/50 hover:text-nekko-light"
-              >
-                Acessar financeiro
-                <i data-lucide="arrow-up-right" class="h-4 w-4"></i>
-              </button>
-            </div>
-          </article>
-
-          <!-- ACESSOS RÁPIDOS -->
-          <article class="surface p-5">
-            <div class="mb-5">
-              <h3 class="font-semibold">Acessos rápidos</h3>
-              <p class="mt-1 text-xs text-neutral-500">
-                Atalhos para as principais áreas do sistema.
-              </p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-
-              <button type="button" data-page="projects"
-                class="rounded-xl border border-nekko-border bg-black/20 p-4 text-left transition hover:border-nekko-orange/50">
-                <i data-lucide="clipboard-plus" class="mb-3 h-5 w-5 text-nekko-light"></i>
-                <p class="text-sm font-semibold">Novo projeto</p>
-                <p class="mt-1 text-xs text-neutral-500">Cadastrar serviço</p>
-              </button>
-
-              <button type="button" data-page="clients"
-                class="rounded-xl border border-nekko-border bg-black/20 p-4 text-left transition hover:border-nekko-orange/50">
-                <i data-lucide="user-round-plus" class="mb-3 h-5 w-5 text-nekko-light"></i>
-                <p class="text-sm font-semibold">Novo cliente</p>
-                <p class="mt-1 text-xs text-neutral-500">Cadastrar contato</p>
-              </button>
-
-              <button type="button" data-page="materials"
-                class="rounded-xl border border-nekko-border bg-black/20 p-4 text-left transition hover:border-nekko-orange/50">
-                <i data-lucide="package-plus" class="mb-3 h-5 w-5 text-nekko-light"></i>
-                <p class="text-sm font-semibold">Materiais</p>
-                <p class="mt-1 text-xs text-neutral-500">Gerenciar estoque</p>
-              </button>
-
-              <button type="button" data-page="budgets"
-                class="rounded-xl border border-nekko-border bg-black/20 p-4 text-left transition hover:border-nekko-orange/50">
-                <i data-lucide="file-plus-2" class="mb-3 h-5 w-5 text-nekko-light"></i>
-                <p class="text-sm font-semibold">Orçamentos</p>
-                <p class="mt-1 text-xs text-neutral-500">Criar orçamento</p>
-              </button>
-
-            </div>
-          </article>
-
+        <section class="mb-8">
+          <div class="mb-4"><h3 class="font-semibold">Informação rápida</h3><p class="mt-1 text-xs text-neutral-500">Acesse as áreas do sistema em um só lugar.</p></div>
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+            <button type="button" data-page="projects" class="quick-link"><i data-lucide="clipboard-list" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Serviços</p><p class="mt-1 text-xs text-neutral-500">Cadastrar e acompanhar projetos</p></button>
+            <button type="button" data-page="clients" class="quick-link"><i data-lucide="users" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Clientes</p><p class="mt-1 text-xs text-neutral-500">Cadastros e contatos</p></button>
+            <button type="button" data-page="materials" class="quick-link"><i data-lucide="layers" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Materiais e estoque</p><p class="mt-1 text-xs text-neutral-500">MDF, madeira e insumos</p></button>
+            <button type="button" data-page="finance" class="quick-link"><i data-lucide="wallet" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Financeiro</p><p class="mt-1 text-xs text-neutral-500">Entradas, saídas e resultados</p></button>
+            <button type="button" data-page="reports" class="quick-link"><i data-lucide="chart-no-axes-combined" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Relatórios</p><p class="mt-1 text-xs text-neutral-500">Indicadores da marcenaria</p></button>
+            <button type="button" data-page="stores" class="quick-link"><i data-lucide="store" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Unidades</p><p class="mt-1 text-xs text-neutral-500">Empresa e filiais</p></button>
+            <button type="button" data-page="settings" class="quick-link"><i data-lucide="settings-2" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Configurações</p><p class="mt-1 text-xs text-neutral-500">Preferências do sistema</p></button>
+          </div>
         </section>
-
-        <!-- PROJETOS RECENTES -->
         <section class="surface overflow-hidden">
-          <div class="flex flex-col gap-3 border-b border-nekko-border p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h3 class="font-semibold">Projetos recentes</h3>
-              <p class="mt-1 text-xs text-neutral-500">
-                Acompanhe os últimos projetos cadastrados.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              data-page="projects"
-              class="inline-flex items-center gap-2 text-sm font-medium text-nekko-light hover:text-white"
-            >
-              Ver todos
-              <i data-lucide="arrow-right" class="h-4 w-4"></i>
-            </button>
-          </div>
-
-          <div id="recentProjects" class="overflow-x-auto">
-            <div class="p-10 text-center">
-              <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-neutral-500">
-                <i data-lucide="folder-open" class="h-6 w-6"></i>
-              </div>
-              <p class="text-sm font-medium text-neutral-300">
-                Carregando projetos...
-              </p>
-              <p class="mt-1 text-xs text-neutral-500">
-                As informações aparecerão aqui quando forem carregadas.
-              </p>
-            </div>
-          </div>
+          <div class="flex flex-col gap-3 border-b border-nekko-border p-5 sm:flex-row sm:items-center sm:justify-between"><div><h3 class="font-semibold">Serviços recentes</h3><p class="mt-1 text-xs text-neutral-500">Acompanhe os últimos serviços cadastrados.</p></div><button type="button" data-page="projects" class="inline-flex items-center gap-2 text-sm font-medium text-nekko-light hover:text-white">Ver todos <i data-lucide="arrow-right" class="h-4 w-4"></i></button></div>
+          <div id="recentProjects" class="overflow-x-auto"><div class="p-10 text-center"><div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-neutral-500"><i data-lucide="folder-open" class="h-6 w-6"></i></div><p class="text-sm font-medium text-neutral-300">Carregando serviços...</p><p class="mt-1 text-xs text-neutral-500">Os serviços cadastrados aparecerão aqui.</p></div></div>
         </section>
 
         <!-- RODAPÉ -->
@@ -520,25 +187,7 @@
   <!-- LÓGICA DA PÁGINA -->
   <script src="menu.js"></script>
 
-  <script>
-    if (window.lucide) {
-      window.lucide.createIcons();
-    }
-
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('mobileOverlay');
-
-    document.getElementById('mobileMenuButton')
-      .addEventListener('click', () => {
-        sidebar.classList.add('open');
-        overlay.classList.add('open');
-      });
-
-    overlay.addEventListener('click', () => {
-      sidebar.classList.remove('open');
-      overlay.classList.remove('open');
-    });
-  </script>
+  <script>if (window.lucide) window.lucide.createIcons();</script>
 
 </body>
 </html>
