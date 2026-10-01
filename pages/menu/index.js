@@ -1,8 +1,3 @@
-
-/**
- * NEKKO WOOD — Lógica do painel principal
- * Carrega os dados da empresa e da unidade ativa.
- */
 (() => {
   'use strict';
 
@@ -129,13 +124,18 @@
   function updateHeader() {
     const name = getDisplayName(currentUser);
     const companyName = activeCompany?.name || 'Sua marcenaria';
-    const storeName = activeStore?.name || 'Unidade principal';
 
     setText('sidebarUserName', name);
     setText('sidebarCompanyName', companyName);
     setText('welcomeName', getFirstName(name));
     setText('headerCompanyName', companyName);
-    setText('headerStoreName', storeName);
+
+    // O cabeçalho mostra somente o nome da marcenaria, sem a unidade.
+    const storeSubtitle = $('headerStoreName');
+    if (storeSubtitle) {
+      storeSubtitle.textContent = '';
+      storeSubtitle.classList.add('hidden');
+    }
   }
 
   async function loadContext() {
@@ -261,7 +261,7 @@
           .select('id', { count: 'exact', head: true })
           .eq('company_id', companyId)
           .eq('store_id', storeId)
-          .in('status', ['PENDING', 'IN_PROGRESS']),
+          .eq('status', 'OPEN'),
 
         supabase
           .from('clients')
@@ -331,6 +331,7 @@
   function getStatusLabel(status) {
     const labels = {
       QUOTE: 'Orçamento',
+      OPEN: 'Aberto',
       PENDING: 'Pendente',
       IN_PROGRESS: 'Em andamento',
       COMPLETED: 'Concluído',
@@ -445,8 +446,7 @@
     try {
       await Promise.all([
         loadCounts(),
-        loadFinance(),
-        loadRecentProjects()
+        loadFinance()
       ]);
     } catch (error) {
       console.error('[NEKKO WOOD] Erro ao carregar o painel:', error);
