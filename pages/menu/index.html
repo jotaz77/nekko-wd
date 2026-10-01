@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -42,8 +41,8 @@
     }
 
     .quick-link {
-      min-height: 142px; border: 1px solid #292929; border-radius: 14px;
-      background: #111111; padding: 18px; text-align: left;
+      min-height: 104px; border: 1px solid #292929; border-radius: 12px;
+      background: #111111; padding: 14px; text-align: left;
       transition: border-color .2s, background .2s, transform .2s;
     }
     .quick-link:hover { border-color: rgba(198,90,22,.65); background: #17120f; transform: translateY(-2px); }
@@ -76,9 +75,9 @@
   <div class="min-h-screen">
     <header class="sticky top-0 z-20 border-b border-nekko-border bg-nekko-bg/95 backdrop-blur-md">
       <div class="mx-auto flex min-h-[76px] max-w-[1600px] items-center justify-between gap-4 px-5 md:px-8">
-        <div class="flex min-w-0 items-center gap-3">
+        <div class="flex shrink-0 items-center gap-3">
           <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-nekko-orange"><i data-lucide="hammer" class="h-6 w-6 text-white"></i></div>
-          <div class="min-w-0"><h1 class="truncate text-lg font-black tracking-[0.12em]">NEKKO <span class="text-nekko-light">WOOD</span></h1><p class="text-[10px] uppercase tracking-[0.18em] text-neutral-500">Gestão para marcenarias</p></div>
+          <div class="min-w-[150px]"><h1 class="whitespace-nowrap text-base font-black tracking-[0.08em] sm:text-lg">NEKKO <span class="text-nekko-light">WOOD</span></h1><p class="whitespace-nowrap text-[9px] uppercase tracking-[0.12em] text-neutral-500 sm:text-[10px]">Gestão para marcenarias</p></div>
         </div>
         <div class="flex min-w-0 items-center gap-3">
           <div class="hidden text-right sm:block"><p id="headerCompanyName" class="max-w-[220px] truncate text-sm font-semibold">Sua marcenaria</p><p id="headerStoreName" class="text-xs text-neutral-500">Unidade principal</p></div>
@@ -88,46 +87,7 @@
       </div>
     </header>
     <!-- CONTEÚDO PRINCIPAL -->
-    <main id="mainContent" class="min-h-screen md:ml-[260px]">
-
-      <!-- CABEÇALHO -->
-      <header class="sticky top-0 z-20 flex h-[76px] items-center justify-between gap-4 border-b border-nekko-border bg-nekko-bg/95 px-5 backdrop-blur-md md:px-8">
-
-        <div class="flex min-w-0 items-center gap-3">
-          <button
-            id="mobileMenuButton"
-            type="button"
-            aria-label="Abrir menu"
-            class="rounded-lg border border-nekko-border p-2 text-neutral-300 md:hidden"
-          >
-            <i data-lucide="menu" class="h-5 w-5"></i>
-          </button>
-
-          <div class="min-w-0">
-            <h2 id="pageTitle" class="truncate text-lg font-bold md:text-xl">
-              Visão geral
-            </h2>
-            <p id="pageSubtitle" class="hidden text-xs text-neutral-500 sm:block">
-              Acompanhe os indicadores da sua marcenaria.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <div class="hidden text-right sm:block">
-            <p id="headerCompanyName" class="max-w-[200px] truncate text-sm font-medium">
-              Sua marcenaria
-            </p>
-            <p id="headerStoreName" class="text-xs text-neutral-500">
-              Unidade principal
-            </p>
-          </div>
-
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-nekko-border bg-nekko-surface text-nekko-light">
-            <i data-lucide="hammer" class="h-5 w-5"></i>
-          </div>
-        </div>
-      </header>
+    <main id="mainContent" class="min-h-screen">
 
       <!-- ÁREA DA PÁGINA -->
       <div class="mx-auto max-w-[1600px] p-5 md:p-8">
@@ -150,20 +110,15 @@
         <section class="mb-8">
           <div class="mb-4"><h3 class="font-semibold">Informação rápida</h3><p class="mt-1 text-xs text-neutral-500">Acesse as áreas do sistema em um só lugar.</p></div>
           <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-            <button type="button" data-page="projects" class="quick-link"><i data-lucide="clipboard-list" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Serviços</p><p class="mt-1 text-xs text-neutral-500">Cadastrar e acompanhar projetos</p></button>
-            <button type="button" data-page="clients" class="quick-link"><i data-lucide="users" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Clientes</p><p class="mt-1 text-xs text-neutral-500">Cadastros e contatos</p></button>
-            <button type="button" data-page="materials" class="quick-link"><i data-lucide="layers" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Materiais e estoque</p><p class="mt-1 text-xs text-neutral-500">MDF, madeira e insumos</p></button>
-            <button type="button" data-page="finance" class="quick-link"><i data-lucide="wallet" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Financeiro</p><p class="mt-1 text-xs text-neutral-500">Entradas, saídas e resultados</p></button>
-            <button type="button" data-page="reports" class="quick-link"><i data-lucide="chart-no-axes-combined" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Relatórios</p><p class="mt-1 text-xs text-neutral-500">Indicadores da marcenaria</p></button>
-            <button type="button" data-page="stores" class="quick-link"><i data-lucide="store" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Unidades</p><p class="mt-1 text-xs text-neutral-500">Empresa e filiais</p></button>
-            <button type="button" data-page="settings" class="quick-link"><i data-lucide="settings-2" class="mb-3 h-6 w-6 text-nekko-light"></i><p class="text-sm font-semibold">Configurações</p><p class="mt-1 text-xs text-neutral-500">Preferências do sistema</p></button>
+            <button type="button" data-page="projects" class="quick-link"><i data-lucide="clipboard-list" class="mb-2 h-5 w-5 text-nekko-light"></i><p class="text-sm font-semibold">Serviços</p><p class="mt-1 text-xs text-neutral-500">Cadastrar e acompanhar projetos</p></button>
+            <button type="button" data-page="clients" class="quick-link"><i data-lucide="users" class="mb-2 h-5 w-5 text-nekko-light"></i><p class="text-sm font-semibold">Clientes</p><p class="mt-1 text-xs text-neutral-500">Cadastros e contatos</p></button>
+            <button type="button" data-page="materials" class="quick-link"><i data-lucide="layers" class="mb-2 h-5 w-5 text-nekko-light"></i><p class="text-sm font-semibold">Materiais e estoque</p><p class="mt-1 text-xs text-neutral-500">MDF, madeira e insumos</p></button>
+            <button type="button" data-page="finance" class="quick-link"><i data-lucide="wallet" class="mb-2 h-5 w-5 text-nekko-light"></i><p class="text-sm font-semibold">Financeiro</p><p class="mt-1 text-xs text-neutral-500">Entradas, saídas e resultados</p></button>
+            <button type="button" data-page="reports" class="quick-link"><i data-lucide="chart-no-axes-combined" class="mb-2 h-5 w-5 text-nekko-light"></i><p class="text-sm font-semibold">Relatórios</p><p class="mt-1 text-xs text-neutral-500">Indicadores da marcenaria</p></button>
+            <button type="button" data-page="stores" class="quick-link"><i data-lucide="store" class="mb-2 h-5 w-5 text-nekko-light"></i><p class="text-sm font-semibold">Unidades</p><p class="mt-1 text-xs text-neutral-500">Empresa e filiais</p></button>
+            <button type="button" data-page="settings" class="quick-link"><i data-lucide="settings-2" class="mb-2 h-5 w-5 text-nekko-light"></i><p class="text-sm font-semibold">Configurações</p><p class="mt-1 text-xs text-neutral-500">Preferências do sistema</p></button>
           </div>
         </section>
-        <section class="surface overflow-hidden">
-          <div class="flex flex-col gap-3 border-b border-nekko-border p-5 sm:flex-row sm:items-center sm:justify-between"><div><h3 class="font-semibold">Serviços recentes</h3><p class="mt-1 text-xs text-neutral-500">Acompanhe os últimos serviços cadastrados.</p></div><button type="button" data-page="projects" class="inline-flex items-center gap-2 text-sm font-medium text-nekko-light hover:text-white">Ver todos <i data-lucide="arrow-right" class="h-4 w-4"></i></button></div>
-          <div id="recentProjects" class="overflow-x-auto"><div class="p-10 text-center"><div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-neutral-500"><i data-lucide="folder-open" class="h-6 w-6"></i></div><p class="text-sm font-medium text-neutral-300">Carregando serviços...</p><p class="mt-1 text-xs text-neutral-500">Os serviços cadastrados aparecerão aqui.</p></div></div>
-        </section>
-
         <!-- RODAPÉ -->
         <footer class="mt-8 flex flex-col justify-between gap-2 border-t border-nekko-border pt-5 text-xs text-neutral-600 sm:flex-row">
           <p>NEKKO WOOD · Gestão inteligente para marcenarias</p>
@@ -172,6 +127,19 @@
 
       </div>
     </main>
+  </div>
+
+
+  <!-- Compatibilidade com o menu.js atual: elementos legados mantidos ocultos -->
+  <div class="hidden" aria-hidden="true">
+    <span id="userName"></span>
+    <span id="modeBadge" class="hidden"></span>
+    <span id="currentStore"></span>
+    <div id="menuGrid"></div>
+    <span id="pageTitle">Visão geral</span>
+    <span id="pageSubtitle">Acompanhe os indicadores da sua marcenaria.</span>
+    <span id="sidebarUserName"></span>
+    <span id="sidebarCompanyName"></span>
   </div>
 
   <!-- SUPABASE E MÓDULOS DO SISTEMA -->
