@@ -1,1 +1,323 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090909">
+<title>Novo serviço | NEKKO WD</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+        * {
+            box-sizing: border-box
+        }
 
+        body {
+            margin: 0;
+            background: #090909;
+            color: #f5f5f5;
+            font-family: Inter, system-ui, sans-serif
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: #090909;
+            border: 1px solid #292929;
+            border-radius: 10px;
+            padding: 11px 12px;
+            color: #f5f5f5;
+            outline: none
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #c65a16
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #686868
+        }
+
+        select option {
+            background: #111;
+            color: #fff
+        }
+
+        .panel {
+            background: #111;
+            border: 1px solid #292929;
+            border-radius: 15px
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 7px;
+            color: #b5b5b5;
+            font-size: 12px;
+            font-weight: 600
+        }
+
+        .primary {
+            background: #c65a16;
+            color: #fff
+        }
+
+        .primary:hover {
+            background: #a9480e
+        }
+
+        .primary:disabled {
+            opacity: .55
+        }
+
+        .section-icon {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border-radius: 10px;
+            background: #2c1a10;
+            color: #f28a3d;
+            flex-shrink: 0
+        }
+
+        .tool {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border: 1px solid #292929;
+            border-radius: 9px;
+            padding: 9px 12px;
+            color: #ddd;
+            font-size: 12px;
+            font-weight: 600
+        }
+
+        .tool.active {
+            border-color: #c65a16;
+            background: #2c1a10;
+            color: #f28a3d
+        }
+
+        .canvas-wrap {
+            overflow: hidden;
+            border: 1px solid #383838;
+            border-radius: 12px;
+            background: #f8f7f3;
+            background-image: radial-gradient(#d6d3cc 1px, transparent 1px);
+            background-size: 18px 18px
+        }
+
+        #sketchCanvas {
+            display: block;
+            width: 100%;
+            height: 350px;
+            touch-action: none;
+            cursor: crosshair
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700
+        }
+
+        .QUOTE,
+        .PENDING {
+            background: #332713;
+            color: #f3c969
+        }
+
+        .IN_PROGRESS {
+            background: #172c3e;
+            color: #79c1ff
+        }
+
+        .COMPLETED,
+        .DELIVERED {
+            background: #173524;
+            color: #72d99a
+        }
+
+        .CANCELLED {
+            background: #391d1d;
+            color: #f28b82
+        }
+
+        @media(max-width:640px) {
+            #sketchCanvas {
+                height: 290px
+            }
+        }
+    </style>
+</head>
+<body>
+<header class="sticky top-0 z-20 border-b border-[#292929] bg-[#090909]/95">
+  <div class="mx-auto flex max-w-[1450px] items-center justify-between gap-3 px-4 py-4">
+    <div class="flex items-center gap-3">
+      <a href="projects.html" class="grid h-10 w-10 place-items-center rounded-xl border border-[#292929] text-[#F28A3D]" aria-label="Voltar para projetos">
+        <i data-lucide="arrow-left"></i>
+      </a>
+      <div>
+        <div class="text-xs font-bold tracking-widest text-[#F28A3D]">NEKKO WD</div>
+        <h1 class="text-xl font-bold">Novo serviço</h1>
+      </div>
+    </div>
+    <div class="hidden items-center gap-2 sm:flex">
+      <span class="rounded-xl border border-[#292929] px-3 py-2 text-xs text-gray-400">Cadastro de projeto</span>
+    </div>
+  </div>
+</header>
+<main class="mx-auto max-w-[1100px] px-4 py-6">
+<section id="formSection" class="panel overflow-hidden">
+            <div class="flex items-center justify-between border-b border-[#292929] p-5">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-[#F28A3D]">Cadastro</p>
+                    <h2 id="formTitle" class="mt-1 text-lg font-bold">Novo projeto</h2>
+                </div><button id="close" type="button" aria-label="Fechar"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form" class="space-y-6 p-5"><input type="hidden" id="projectId">
+                <section>
+                    <div class="mb-4 flex items-center gap-3"><span class="section-icon"><i
+                                data-lucide="user-round"></i></span>
+                        <div>
+                            <h3 class="font-bold">Cliente e serviço</h3>
+                            <p class="text-xs text-gray-500">Identificação do pedido</p>
+                        </div>
+                    </div>
+                    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        <div><label class="label" for="clientId">Cliente</label><select id="clientId">
+                                <option value="">Sem cliente vinculado</option>
+                            </select></div>
+                        <div><label class="label" for="title">Nome do projeto *</label><input id="title" required
+                                maxlength="150" placeholder="Ex.: Cozinha planejada"></div>
+                        <div><label class="label" for="service">Serviço</label><input id="service"
+                                placeholder="Fabricação e instalação"></div>
+                        <div><label class="label" for="environment">Ambiente</label><select id="environment">
+                                <option value="">Selecione</option>
+                                <option>Cozinha</option>
+                                <option>Sala de estar</option>
+                                <option>Sala de jantar</option>
+                                <option>Quarto</option>
+                                <option>Banheiro</option>
+                                <option>Lavanderia</option>
+                                <option>Escritório</option>
+                                <option>Área gourmet</option>
+                                <option>Comercial</option>
+                                <option>Outro</option>
+                            </select></div>
+                        <div><label class="label" for="status">Status</label><select id="status">
+                                <option value="QUOTE">Orçamento</option>
+                                <option value="PENDING">Pendente</option>
+                                <option value="IN_PROGRESS">Em andamento</option>
+                                <option value="COMPLETED">Concluído</option>
+                                <option value="DELIVERED">Entregue</option>
+                                <option value="CANCELLED">Cancelado</option>
+                            </select></div>
+                        <div><label class="label" for="deadline">Prazo estimado</label><input id="deadline" type="date">
+                        </div>
+                    </div>
+                </section>
+                <section class="border-t border-[#292929] pt-6">
+                    <div class="mb-4 flex items-center gap-3"><span class="section-icon"><i
+                                data-lucide="ruler"></i></span>
+                        <h3 class="font-bold">Medidas (mm)</h3>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        <div><label class="label" for="width">Largura</label><input id="width" type="number" min="0"
+                                step=".01"></div>
+                        <div><label class="label" for="length">Comprimento</label><input id="length" type="number"
+                                min="0" step=".01"></div>
+                        <div><label class="label" for="height">Altura</label><input id="height" type="number" min="0"
+                                step=".01"></div>
+                        <div><label class="label" for="area">Área (m²)</label><input id="area" type="number" min="0"
+                                step=".01"><button id="calcArea" type="button"
+                                class="mt-2 text-xs text-[#F28A3D]">Calcular largura × comprimento</button></div>
+                    </div>
+                </section>
+                <section class="border-t border-[#292929] pt-6">
+                    <div class="mb-4 flex items-center gap-3"><span class="section-icon"><i
+                                data-lucide="panels-top-left"></i></span>
+                        <h3 class="font-bold">Materiais</h3>
+                    </div>
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <div><label class="label" for="material">Tipo de material</label><select id="material">
+                                <option value="">Selecione</option>
+                                <option>MDF</option>
+                                <option>MDP</option>
+                                <option>Madeira maciça</option>
+                                <option>Compensado</option>
+                                <option>Outro</option>
+                            </select></div>
+                        <div><label class="label" for="color">Cor / acabamento</label><input id="color"
+                                placeholder="Ex.: Carvalho, branco TX"></div>
+                        <div><label class="label" for="thickness">Espessura (mm)</label><input id="thickness"
+                                type="number" min="0" step=".1"></div>
+                    </div>
+                </section>
+                <section class="border-t border-[#292929] pt-6">
+                    <div class="mb-4 flex items-center gap-3"><span class="section-icon"><i
+                                data-lucide="pencil-ruler"></i></span>
+                        <div>
+                            <h3 class="font-bold">Desenho do projeto</h3>
+                            <p class="text-xs text-gray-500">Desenhe com mouse ou toque. O rascunho será salvo junto ao
+                                projeto.</p>
+                        </div>
+                    </div>
+                    <div class="mb-3 flex flex-wrap gap-2"><button type="button" class="tool active" data-tool="pen"><i
+                                data-lucide="pencil"></i>Lápis</button><button type="button" class="tool"
+                            data-tool="eraser"><i data-lucide="eraser"></i>Borracha</button><button type="button"
+                            id="undo" class="tool"><i data-lucide="undo-2"></i>Desfazer</button><button type="button"
+                            id="clear" class="tool"><i data-lucide="trash-2"></i>Limpar</button></div>
+                    <div class="mb-3 flex flex-wrap items-center gap-4">
+                        <div class="flex items-center gap-2"><label class="text-xs text-gray-400"
+                                for="colorPicker">Cor</label><input id="colorPicker" class="!w-10 !p-1" type="color"
+                                value="#202020"></div>
+                        <div class="flex flex-1 items-center gap-3"><label class="text-xs text-gray-400"
+                                for="strokeWidth">Espessura</label><input id="strokeWidth" type="range" min="1" max="12"
+                                value="3" class="!p-0 !accent-[#C65A16]"><span id="widthValue" class="text-xs">3</span>
+                        </div>
+                    </div>
+                    <div class="canvas-wrap"><canvas id="sketchCanvas" aria-label="Área de desenho do projeto"></canvas>
+                    </div>
+                    <div class="mt-3 flex justify-between gap-2">
+                        <p class="text-xs text-gray-500">Rascunho interno; não vai para notas.</p><span id="sketchState"
+                            class="text-xs text-gray-500">Nenhum desenho salvo</span>
+                    </div>
+                </section>
+                <section class="border-t border-[#292929] pt-6">
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div><label class="label" for="estimated">Valor estimado (R$)</label><input id="estimated"
+                                type="number" min="0" step=".01" value="0"></div>
+                        <div><label class="label" for="final">Valor final (R$)</label><input id="final" type="number"
+                                min="0" step=".01" placeholder="Opcional"></div>
+                        <div class="md:col-span-2"><label class="label" for="description">Descrição do
+                                projeto</label><textarea id="description" rows="3" maxlength="5000"
+                                placeholder="O que será produzido, ferragens e acabamentos..."></textarea></div>
+                        <div class="md:col-span-2"><label class="label" for="notes">Observações
+                                internas</label><textarea id="notes" rows="2" maxlength="5000"></textarea></div>
+                    </div>
+                </section>
+                <div id="formMessage" class="hidden rounded-xl border p-3 text-sm" role="status"></div>
+                <div class="flex flex-col-reverse gap-3 border-t border-[#292929] pt-5 sm:flex-row sm:justify-end">
+                    <button id="cancel" type="button"
+                        class="rounded-xl border border-[#292929] px-5 py-3 text-sm">Cancelar</button><button id="save"
+                        type="submit" class="primary rounded-xl px-6 py-3 text-sm font-bold">Salvar projeto</button>
+                </div>
+            </form>
+        </section>
+</main>
+<footer class="mx-auto max-w-[1100px] border-t border-[#292929] px-4 py-5 text-center text-xs text-gray-600">NEKKO WD · Gestão para marcenarias</footer>
+<script src="../../assets/js/config.js"></script>
+<script src="../../assets/js/supabase.js"></script>
+<script src="../../assets/js/bootstrap.js"></script>
+<script src="createproject.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
