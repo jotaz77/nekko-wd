@@ -204,7 +204,7 @@
     if (!canvas) return;
 
     canvas.addEventListener('pointerdown', (event) => {
-      if (busy || !ctx) return;
+      if (busy) return;
 
       event.preventDefault();
 
@@ -230,14 +230,16 @@
 
       strokes.push(activeStroke);
 
-      canvas.setPointerCapture(event.pointerId);
+      if (canvas.setPointerCapture) {
+        canvas.setPointerCapture(event.pointerId);
+      }
 
       markSketchDirty();
       draw();
     });
 
     canvas.addEventListener('pointermove', (event) => {
-      if (!activeStroke) return;
+      if (!activeStroke || busy) return;
 
       const rect = canvas.getBoundingClientRect();
 
