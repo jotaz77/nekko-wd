@@ -460,6 +460,13 @@
 
     if (!details) return;
 
+    // O módulo de projetos já possui telas próprias.
+    // "Serviços" abre a listagem e "Novo serviço" abre o cadastro.
+    if (page === 'projects') {
+      window.location.href = '../projects/projects.html';
+      return;
+    }
+
     document.querySelectorAll('[data-page]').forEach((button) => {
       button.classList.toggle(
         'active',
@@ -479,11 +486,36 @@
       return;
     }
 
-    // Os módulos serão conectados às respectivas telas nas próximas etapas.
+    // Os demais módulos serão conectados às respectivas telas nas próximas etapas.
     showMessage(
       `A área "${details.title}" está sendo preparada. A navegação será conectada quando o módulo estiver pronto.`,
       'success'
     );
+  }
+
+  function setupProjectActions() {
+    // Localiza as ações pelo texto para funcionar mesmo que o HTML
+    // não possua um ID específico nesses botões.
+    document.querySelectorAll('a, button').forEach((element) => {
+      const text = element.textContent?.trim().toLowerCase();
+
+      if (!text) return;
+
+      if (text === 'novo serviço' || text === 'novo projeto') {
+        element.addEventListener('click', (event) => {
+          event.preventDefault();
+          window.location.href = '../projects/createproject.html';
+        });
+        return;
+      }
+
+      if (text === 'serviços' || text === 'projetos e serviços') {
+        element.addEventListener('click', (event) => {
+          event.preventDefault();
+          window.location.href = '../projects/projects.html';
+        });
+      }
+    });
   }
 
   function setupNavigation() {
@@ -492,6 +524,8 @@
         navigate(button.dataset.page);
       });
     });
+
+    setupProjectActions();
   }
 
   async function logout() {
