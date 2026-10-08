@@ -227,14 +227,14 @@
                 <section class="border-t border-[#292929] pt-6">
                     <div class="mb-4 flex items-center gap-3"><span class="section-icon"><i
                                 data-lucide="ruler"></i></span>
-                        <h3 class="font-bold">Medidas (m)</h3>
+                        <h3 class="font-bold">Medidas (mm)</h3>
                     </div>
                     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                        <div><label class="label" for="width">Largura (m)</label><input id="width" type="number" min="0"
+                        <div><label class="label" for="width">Largura</label><input id="width" type="number" min="0"
                                 step=".01"></div>
-                        <div><label class="label" for="length">Comprimento (m)</label><input id="length" type="number"
+                        <div><label class="label" for="length">Comprimento</label><input id="length" type="number"
                                 min="0" step=".01"></div>
-                        <div><label class="label" for="height">Altura (m)</label><input id="height" type="number" min="0"
+                        <div><label class="label" for="height">Altura</label><input id="height" type="number" min="0"
                                 step=".01"></div>
                         <div><label class="label" for="area">Área (m²)</label><input id="area" type="number" min="0"
                                 step=".01"><button id="calcArea" type="button"
@@ -257,7 +257,7 @@
                             </select></div>
                         <div><label class="label" for="color">Cor / acabamento</label><input id="color"
                                 placeholder="Ex.: Carvalho, branco TX"></div>
-                        <div><label class="label" for="thickness">Espessura (m)</label><input id="thickness"
+                        <div><label class="label" for="thickness">Espessura (cm)</label><input id="thickness"
                                 type="number" min="0" step=".1"></div>
                     </div>
                 </section>
@@ -314,6 +314,7 @@
         </section>
 </main>
 <footer class="mx-auto max-w-[1100px] border-t border-[#292929] px-4 py-5 text-center text-xs text-gray-600">NEKKO WD · Gestão para marcenarias</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../../assets/js/config.js"></script>
 <script src="../../assets/js/supabase.js"></script>
 <script src="../../assets/js/bootstrap.js"></script>
