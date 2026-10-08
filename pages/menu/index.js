@@ -261,7 +261,7 @@
           .select('id', { count: 'exact', head: true })
           .eq('company_id', companyId)
           .eq('store_id', storeId)
-          .eq('status', 'OPEN'),
+          .in('status', ['PENDING', 'IN_PROGRESS']),
 
         supabase
           .from('clients')
@@ -331,7 +331,6 @@
   function getStatusLabel(status) {
     const labels = {
       QUOTE: 'Orçamento',
-      OPEN: 'Aberto',
       PENDING: 'Pendente',
       IN_PROGRESS: 'Em andamento',
       COMPLETED: 'Concluído',
