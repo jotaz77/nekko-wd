@@ -354,12 +354,297 @@
   function calculateArea() {
     const width = num($('width')?.value);
     const length = num($('length')?.value);
+    const area = $('area');
 
-    if (!width || !length || width <= 0 || length <= 0) {
-        if ($('area')) $('area').value = '';
-        return;
-    }
+    if (!area) return;
 
     // Medidas em metros: m × m = m²
-    $('area').value = (width * length).toFixed(2);
+    if (!width || !length || width <= 0 || length <= 0) {
+      area.value = '';
+      return;
+    }
+
+    area.value = (width * length).toFixed(2);
+  }
+
+  function buildPayload() {
+    return {
+      company_id: ctx.company_id,
+      store_id: ctx.store_id || null,
+      client_id: $('clientId').value || null,
+
+      title: $('title').value.trim(),
+      service_name: $('service').value.trim() || null,
+      environment_type: $('environment').value || null,
+
+      status: $('status').value || 'PENDING',
+
+      width_m: num($('width').value),
+      length_m: num($('length').value),
+      height_m: num($('height').value),
+      area_m2: num($('area').value),
+
+      material_type: $('material').value || null,
+      material_color: $('color').value.trim() || null,
+      material_thickness_m: num($('thickness').value),
+
+      estimated_value: num($('estimated').value) ?? 0,
+      final_value: num($('final').value),
+
+      deadline: $('deadline').value || null,
+
+      description: $('description').value.trim() || null,
+      notes: $('notes').value.trim() || null,
+
+      sketch_data: {
+        version: 1,
+        strokes: JSON.parse(JSON.stringify(strokes))
+      }
+    };
+  }
+
+  async function saveProject(event) {
+    event.preventDefault();
+
+    if (busy) return;
+
+    hideMessage();
+
+    if (!$('title').value.trim()) {
+      showMessage('Informe o nome do projeto.');
+      $('title').focus();
+      return;
+    }
+
+    if (!validateNumberFields()) return;
+
+    busy = true;
+
+    const saveButton = $('save');
+
+    if (saveButton) {
+      saveButton.disabled = true;
+      saveButton.textContent = editId
+        ? 'Salvando alterações...'
+        : 'Salvando projeto...';
+    }
+
+    try {
+      const payload = buildPayload();
+
+      let result;
+
+      if (editId) {
+        result = await window.supabaseClient
+          .from('woodworking_projects')
+          .update(payload)
+          .eq('id', editId)
+          .eq('company_id', ctx.company_id)
+          .select('id')
+          .maybeSingle();
+      } else {
+        payload.created_by = user.id;
+
+        result = await window.supabaseClient
+          .from('woodworking_projects')
+          .insert(payload)
+          .select('id, project_number')
+          .single();
+      }
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      if (!result.data) {
+        throw new Error(
+          'Nenhum projeto foi salvo. Verifique as permissões do Supabase.'
+        );
+      }
+
+      if ($('sketchState')) {
+        $('sketchState').textContent = strokes.length
+          ? 'Desenho salvo no projeto'
+          : 'Projeto salvo sem desenho';
+      }
+
+      showMessage(
+        editId
+          ? 'Projeto atualizado com sucesso!'
+          : 'Projeto cadastrado com sucesso!',
+        true
+      );
+
+      setTimeout(() => {
+        window.location.href = 'projects.html';
+      }, 700);
+    } catch (error) {
+      console.error('[NEKKO WD] Erro ao salvar projeto:', error);
+
+      showMessage(
+        error?.message ||
+          'Não foi possível salvar o projeto. Verifique a conexão e as permissões do Supabase.'
+      );
+    } finally {
+      busy = false;
+
+      if (saveButton) {
+        saveButton.disabled = false;
+        saveButton.textContent = editId
+          ? 'Salvar alterações'
+          : 'Salvar projeto';
+      }
+    }
+  }
+
+  async function loadProject(id) {
+    let query = window.supabaseClient
+      .from('woodworking_projects')
+      .select(
+        'id, client_id, title, service_name, environment_type, status, width_m, length_m, height_m, area_m2, material_type, material_color, material_thickness_m, estimated_value, final_value, deadline, description, notes, sketch_data'
+      )
+      .eq('id', id)
+      .eq('company_id', ctx.company_id);
+
+    query = scope(query);
+
+    const { data, error } = await query.maybeSingle();
+
+    if (error) throw error;
+
+    if (!data) {
+      throw new Error('Projeto não encontrado ou sem permissão de acesso.');
+    }
+
+    editId = data.id;
+
+    const fields = {
+      clientId: 'client_id',
+      title: 'title',
+      service: 'service_name',
+      environment: 'environment_type',
+      status: 'status',
+      deadline: 'deadline',
+      width: 'width_m',
+      length: 'length_m',
+      height: 'height_m',
+      area: 'area_m2',
+      material: 'material_type',
+      color: 'material_color',
+      thickness: 'material_thickness_m',
+      estimated: 'estimated_value',
+      final: 'final_value',
+      description: 'description',
+      notes: 'notes'
+    };
+
+    for (const [elementId, property] of Object.entries(fields)) {
+      const element = $(elementId);
+
+      if (element) {
+        element.value = data[property] ?? '';
+      }
+    }
+
+    calculateArea();
+    loadSketch(data.sketch_data);
+
+    if ($('formTitle')) {
+      $('formTitle').textContent = 'Editar projeto';
+    }
+
+    if ($('save')) {
+      $('save').textContent = 'Salvar alterações';
+    }
+
+    document.title = 'Editar projeto | NEKKO WD';
+  }
+
+  function setupEvents() {
+    $('form')?.addEventListener('submit', saveProject);
+
+    $('calcArea')?.addEventListener('click', calculateArea);
+    $('width')?.addEventListener('input', calculateArea);
+    $('length')?.addEventListener('input', calculateArea);
+
+    $('cancel')?.addEventListener('click', () => {
+      window.location.href = 'projects.html';
+    });
+
+    $('close')?.addEventListener('click', () => {
+      window.location.href = 'projects.html';
+    });
+  }
+
+  async function init() {
+    try {
+      if (
+        !window.supabaseClient ||
+        !window.NekkoBootstrap
+      ) {
+        throw new Error(
+          'Os componentes do sistema não foram carregados. Atualize a página.'
+        );
+      }
+
+      const { data, error } =
+        await window.supabaseClient.auth.getSession();
+
+      if (error) throw error;
+
+      if (!data.session) {
+        window.location.replace('../login/login.html');
+        return;
+      }
+
+      user = data.session.user;
+
+      const result = await window.NekkoBootstrap.init();
+
+      if (
+        !result ||
+        result.status !== 'ready' ||
+        !result.context
+      ) {
+        window.location.replace(
+          result?.status === 'no_store'
+            ? '../onboarding/stores.html'
+            : '../onboarding/company.html'
+        );
+
+        return;
+      }
+
+      ctx = result.context;
+
+      if (!ctx.company_id) {
+        throw new Error('Empresa ativa não identificada.');
+      }
+
+      await loadClients();
+
+      const params = new URLSearchParams(window.location.search);
+      const requestedId = params.get('id');
+
+      if (requestedId) {
+        await loadProject(requestedId);
+      }
+
+      console.info('[NEKKO WD] Tela de criação de projeto pronta.');
+    } catch (error) {
+      console.error(
+        '[NEKKO WD] Erro ao inicializar criação de projeto:',
+        error
+      );
+
+      showMessage(
+        error?.message ||
+          'Não foi possível carregar a tela de criação do projeto.'
+      );
+    }
+  }
+
+  setupEvents();
+  initCanvas();
+  init();
 })();
