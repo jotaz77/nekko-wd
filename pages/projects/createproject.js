@@ -61,11 +61,11 @@
 
   function validateNumberFields() {
     const fields = [
-      ['width', 'largura'],
-      ['length', 'comprimento'],
-      ['height', 'altura'],
+      ['width', 'largura (m)'],
+      ['length', 'comprimento (m)'],
+      ['height', 'altura (m)'],
       ['area', 'área'],
-      ['thickness', 'espessura'],
+      ['thickness', 'espessura (m)'],
       ['estimated', 'valor estimado'],
       ['final', 'valor final']
     ];
@@ -204,7 +204,7 @@
     if (!canvas) return;
 
     canvas.addEventListener('pointerdown', (event) => {
-      if (busy) return;
+      if (busy || !ctx) return;
 
       event.preventDefault();
 
@@ -230,16 +230,14 @@
 
       strokes.push(activeStroke);
 
-      if (canvas.setPointerCapture) {
-        canvas.setPointerCapture(event.pointerId);
-      }
+      canvas.setPointerCapture(event.pointerId);
 
       markSketchDirty();
       draw();
     });
 
     canvas.addEventListener('pointermove', (event) => {
-      if (!activeStroke || busy) return;
+      if (!activeStroke) return;
 
       const rect = canvas.getBoundingClientRect();
 
@@ -358,13 +356,11 @@
     const length = num($('length')?.value);
 
     if (!width || !length || width <= 0 || length <= 0) {
-      showMessage(
-        'Informe largura e comprimento maiores que zero para calcular a área.'
-      );
+      if ($('area')) $('area').value = '';
       return;
     }
 
-    $('area').value = ((width / 1000) * (length / 1000)).toFixed(2);
+    $('area').value = (width * length).toFixed(2);
 
     hideMessage();
   }
@@ -381,14 +377,14 @@
 
       status: $('status').value || 'PENDING',
 
-      width_mm: num($('width').value),
-      length_mm: num($('length').value),
-      height_mm: num($('height').value),
+      width_m: num($('width').value),
+      length_m: num($('length').value),
+      height_m: num($('height').value),
       area_m2: num($('area').value),
 
       material_type: $('material').value || null,
       material_color: $('color').value.trim() || null,
-      material_thickness_mm: num($('thickness').value),
+      material_thickness_m: num($('thickness').value),
 
       estimated_value: num($('estimated').value) ?? 0,
       final_value: num($('final').value),
@@ -503,7 +499,7 @@
     let query = window.supabaseClient
       .from('woodworking_projects')
       .select(
-        'id, client_id, title, service_name, environment_type, status, width_mm, length_mm, height_mm, area_m2, material_type, material_color, material_thickness_mm, estimated_value, final_value, deadline, description, notes, sketch_data'
+        'id, client_id, title, service_name, environment_type, status, width_m, length_m, height_m, area_m2, material_type, material_color, material_thickness_m, estimated_value, final_value, deadline, description, notes, sketch_data'
       )
       .eq('id', id)
       .eq('company_id', ctx.company_id);
@@ -527,13 +523,13 @@
       environment: 'environment_type',
       status: 'status',
       deadline: 'deadline',
-      width: 'width_mm',
-      length: 'length_mm',
-      height: 'height_mm',
+      width: 'width_m',
+      length: 'length_m',
+      height: 'height_m',
       area: 'area_m2',
       material: 'material_type',
       color: 'material_color',
-      thickness: 'material_thickness_mm',
+      thickness: 'material_thickness_m',
       estimated: 'estimated_value',
       final: 'final_value',
       description: 'description',
@@ -564,7 +560,8 @@
   function setupEvents() {
     $('form')?.addEventListener('submit', saveProject);
 
-    $('calcArea')?.addEventListener('click', calculateArea);
+    $('width')?.addEventListener('input', calculateArea);
+    $('length')?.addEventListener('input', calculateArea);
 
     $('cancel')?.addEventListener('click', () => {
       window.location.href = 'projects.html';
