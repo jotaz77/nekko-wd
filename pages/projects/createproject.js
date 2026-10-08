@@ -29,6 +29,11 @@
     return Number.isFinite(parsed) ? parsed : null;
   };
 
+  const cmToMm = (value) => {
+    const parsed = num(value);
+    return parsed == null ? null : parsed * 10;
+  };
+
   function showMessage(text, ok = false) {
     const el = $('formMessage');
     if (!el) return;
@@ -204,7 +209,7 @@
     if (!canvas) return;
 
     canvas.addEventListener('pointerdown', (event) => {
-      if (busy) return;
+      if (busy || !ctx2d) return;
 
       event.preventDefault();
 
@@ -354,17 +359,13 @@
   function calculateArea() {
     const width = num($('width')?.value);
     const length = num($('length')?.value);
-    const area = $('area');
 
-    if (!area) return;
-
-    // Medidas em metros: m × m = m²
     if (!width || !length || width <= 0 || length <= 0) {
-      area.value = '';
+      if ($('area')) $('area').value = '';
       return;
     }
 
-    area.value = (width * length).toFixed(2);
+    $('area').value = ((width * length) / 10000).toFixed(2);
   }
 
   function buildPayload() {
@@ -379,14 +380,14 @@
 
       status: $('status').value || 'PENDING',
 
-      width_m: num($('width').value),
-      length_m: num($('length').value),
-      height_m: num($('height').value),
+      width_mm: cmToMm($('width').value),
+      length_mm: cmToMm($('length').value),
+      height_mm: cmToMm($('height').value),
       area_m2: num($('area').value),
 
       material_type: $('material').value || null,
       material_color: $('color').value.trim() || null,
-      material_thickness_m: num($('thickness').value),
+      material_thickness_mm: cmToMm($('thickness').value),
 
       estimated_value: num($('estimated').value) ?? 0,
       final_value: num($('final').value),
@@ -501,7 +502,7 @@
     let query = window.supabaseClient
       .from('woodworking_projects')
       .select(
-        'id, client_id, title, service_name, environment_type, status, width_m, length_m, height_m, area_m2, material_type, material_color, material_thickness_m, estimated_value, final_value, deadline, description, notes, sketch_data'
+        'id, client_id, title, service_name, environment_type, status, width_mm, length_mm, height_mm, area_m2, material_type, material_color, material_thickness_mm, estimated_value, final_value, deadline, description, notes, sketch_data'
       )
       .eq('id', id)
       .eq('company_id', ctx.company_id);
@@ -525,13 +526,13 @@
       environment: 'environment_type',
       status: 'status',
       deadline: 'deadline',
-      width: 'width_m',
-      length: 'length_m',
-      height: 'height_m',
+      width: 'width_mm',
+      length: 'length_mm',
+      height: 'height_mm',
       area: 'area_m2',
       material: 'material_type',
       color: 'material_color',
-      thickness: 'material_thickness_m',
+      thickness: 'material_thickness_mm',
       estimated: 'estimated_value',
       final: 'final_value',
       description: 'description',
@@ -541,8 +542,19 @@
     for (const [elementId, property] of Object.entries(fields)) {
       const element = $(elementId);
 
-      if (element) {
-        element.value = data[property] ?? '';
+      if (!element) continue;
+
+      const value = data[property];
+
+      if (
+        elementId === 'width' ||
+        elementId === 'length' ||
+        elementId === 'height' ||
+        elementId === 'thickness'
+      ) {
+        element.value = value == null ? '' : Number(value) / 10;
+      } else {
+        element.value = value ?? '';
       }
     }
 
@@ -563,9 +575,10 @@
   function setupEvents() {
     $('form')?.addEventListener('submit', saveProject);
 
-    $('calcArea')?.addEventListener('click', calculateArea);
     $('width')?.addEventListener('input', calculateArea);
     $('length')?.addEventListener('input', calculateArea);
+
+    $('calcArea')?.addEventListener('click', calculateArea);
 
     $('cancel')?.addEventListener('click', () => {
       window.location.href = 'projects.html';
@@ -601,21 +614,20 @@
 
       const result = await window.NekkoBootstrap.init();
 
-      if (
-        !result ||
-        result.status !== 'ready' ||
-        !result.context
-      ) {
-        window.location.replace(
-          result?.status === 'no_store'
-            ? '../onboarding/stores.html'
-            : '../onboarding/company.html'
-        );
+      if (!result || result.status !== 'ready') {
+        if (result?.status === 'no_store') {
+          window.location.replace('../onboarding/stores.html');
+        } else if (result?.status === 'no_company') {
+          window.location.replace('../onboarding/company.html');
+        } else if (result?.status === 'unauthenticated') {
+          window.location.replace('../login/login.html');
+        }
 
         return;
       }
 
-      ctx = result.context;
+      // O bootstrap retorna o contexto diretamente no objeto result.
+      ctx = result;
 
       if (!ctx.company_id) {
         throw new Error('Empresa ativa não identificada.');
