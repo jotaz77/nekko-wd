@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clientes | NEKKO WD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root { color-scheme: dark; }
+    body { background: #101010; color: #f5f5f5; }
+    .panel { background: #171717; border: 1px solid #292929; }
+    .field { width: 100%; background: #111; border: 1px solid #303030; border-radius: 12px; padding: 12px 14px; color: #f5f5f5; outline: none; }
+    .field:focus { border-color: #F28A3D; box-shadow: 0 0 0 2px rgba(242,138,61,.12); }
+    .primary { background: #F28A3D; color: #171717; }
+    .primary:hover { background: #ff9b52; }
+    .muted-button { border: 1px solid #353535; background: #1c1c1c; }
+    .muted-button:hover { border-color: #F28A3D; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <header class="border-b border-[#292929] bg-[#141414]">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+      <div class="flex min-w-0 items-center gap-3">
+        <a href="../menu/index.html" aria-label="Voltar ao menu" class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[#303030] text-[#F28A3D] hover:border-[#F28A3D]">
+          <i data-lucide="arrow-left" class="h-5 w-5"></i>
+        </a>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold uppercase tracking-[.2em] text-[#F28A3D]">NEKKO WD</p>
+          <h1 class="truncate text-xl font-bold sm:text-2xl">Clientes</h1>
+        </div>
+      </div>
+      <a id="newClientButton" href="createclient.html" class="primary inline-flex shrink-0 items-center gap-2 rounded-xl px-3 py-3 text-sm font-bold sm:px-4">
+        <i data-lucide="user-plus" class="h-4 w-4"></i>
+        <span class="hidden sm:inline">Novo cliente</span>
+        <span class="sm:hidden">Novo</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+    <section class="mb-6">
+      <p class="max-w-2xl text-sm leading-6 text-gray-400">Consulte seus clientes, acompanhe os serviços vinculados e imprima Ordens de Serviço sem incluir os desenhos técnicos.</p>
+    </section>
+
+    <section class="panel mb-5 rounded-2xl p-4 sm:p-5">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <label class="relative block flex-1">
+          <span class="sr-only">Buscar cliente</span>
+          <i data-lucide="search" class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"></i>
+          <input id="clientSearch" class="field pl-10" type="search" placeholder="Buscar por nome, CPF/CNPJ ou telefone..." autocomplete="off">
+        </label>
+        <button id="clearSearch" type="button" class="muted-button hidden rounded-xl px-4 py-3 text-sm font-medium">Limpar busca</button>
+      </div>
+      <div class="mt-3 flex items-center justify-between gap-3 text-xs text-gray-500">
+        <span id="clientCount">Carregando clientes...</span>
+        <span class="hidden sm:inline">Cadastro e histórico em um só lugar</span>
+      </div>
+    </section>
+
+    <div id="clientMessage" class="mb-4 hidden rounded-xl border p-3 text-sm" role="status" aria-live="polite"></div>
+
+    <section id="clientList" class="grid grid-cols-1 gap-3 lg:grid-cols-2" aria-live="polite">
+      <!-- Os cards de clientes serão inseridos pelo clients.js -->
+    </section>
+
+    <section id="clientEmptyState" class="panel hidden rounded-2xl px-5 py-12 text-center">
+      <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-[#24201c] text-[#F28A3D]">
+        <i data-lucide="users" class="h-7 w-7"></i>
+      </div>
+      <h2 id="emptyTitle" class="text-lg font-bold">Nenhum cliente cadastrado</h2>
+      <p id="emptyDescription" class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-400">Cadastre seu primeiro cliente para vincular os serviços e gerar Ordens de Serviço.</p>
+      <a href="createclient.html" class="primary mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold">
+        <i data-lucide="user-plus" class="h-4 w-4"></i>
+        Cadastrar cliente
+      </a>
+    </section>
+  </main>
+
+  <footer class="mx-auto mt-8 max-w-6xl border-t border-[#292929] px-4 py-5 text-center text-xs text-gray-600 sm:px-6">
+    NEKKO WD · Gestão para marcenarias
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../assets/js/config.js"></script>
+  <script src="../../assets/js/supabase.js"></script>
+  <script src="../../assets/js/auth.js"></script>
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/storage.js"></script>
+  <script src="../../assets/js/bootstrap.js"></script>
+  <script src="clients.js"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
