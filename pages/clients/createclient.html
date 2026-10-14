@@ -1,0 +1,376 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novo Cliente | NEKKO WOOD</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            nekko: {
+              bg: '#111315',
+              panel: '#1A1D20',
+              border: '#2C3035',
+              orange: '#F28C28',
+              muted: '#92979F'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background: #111315;
+      color: #F5F5F5;
+      font-family: Inter, system-ui, sans-serif;
+    }
+
+    input, textarea, select {
+      color-scheme: dark;
+    }
+
+    .field {
+      width: 100%;
+      background: #111315;
+      border: 1px solid #34383E;
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #F5F5F5;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .field:focus {
+      border-color: #F28C28;
+      box-shadow: 0 0 0 3px rgb(242 140 40 / 12%);
+    }
+
+    .field::placeholder {
+      color: #747A82;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #D5D7DA;
+      margin-bottom: 7px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #F5F5F5;
+    }
+
+    .section-description {
+      font-size: 12px;
+      color: #92979F;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen">
+  <header class="sticky top-0 z-20 border-b border-nekko-border bg-nekko-bg/95 backdrop-blur">
+    <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+      <div class="flex items-center gap-3">
+        <a
+          href="clients.html"
+          class="flex h-10 w-10 items-center justify-center rounded-xl border border-nekko-border bg-nekko-panel transition hover:border-nekko-orange"
+          aria-label="Voltar para clientes"
+        >
+          <i data-lucide="arrow-left" class="h-5 w-5"></i>
+        </a>
+
+        <div>
+          <p class="text-xs font-medium uppercase tracking-widest text-nekko-orange">
+            NEKKO WOOD
+          </p>
+          <h1 class="text-lg font-semibold sm:text-xl">Novo cliente</h1>
+        </div>
+      </div>
+
+      <div class="hidden items-center gap-2 text-sm text-nekko-muted sm:flex">
+        <i data-lucide="users" class="h-4 w-4"></i>
+        Gestão de clientes
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
+    <div class="mb-7">
+      <h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">
+        Cadastrar cliente
+      </h2>
+      <p class="mt-2 max-w-2xl text-sm leading-6 text-nekko-muted">
+        Preencha os dados do cliente para facilitar o gerenciamento dos projetos,
+        orçamentos e serviços da sua marcenaria.
+      </p>
+    </div>
+
+    <form id="clientForm" class="space-y-6" novalidate>
+      <section class="rounded-2xl border border-nekko-border bg-nekko-panel p-5 sm:p-7">
+        <div class="mb-6 flex items-start gap-3">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-nekko-orange/10 text-nekko-orange">
+            <i data-lucide="user-round" class="h-5 w-5"></i>
+          </div>
+          <div>
+            <h3 class="section-title">Informações pessoais</h3>
+            <p class="section-description">Dados básicos para identificar o cliente.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div class="sm:col-span-2">
+            <label class="field-label" for="clientName">
+              Nome completo / Razão social <span class="text-nekko-orange">*</span>
+            </label>
+            <input
+              id="clientName"
+              name="name"
+              type="text"
+              class="field"
+              placeholder="Ex.: João da Silva"
+              autocomplete="name"
+              maxlength="150"
+              required
+            >
+          </div>
+
+          <div>
+            <label class="field-label" for="clientDocument">CPF / CNPJ</label>
+            <input
+              id="clientDocument"
+              name="document"
+              type="text"
+              class="field"
+              placeholder="Digite o CPF ou CNPJ"
+              autocomplete="off"
+              maxlength="18"
+            >
+          </div>
+
+          <div>
+            <label class="field-label" for="clientEmail">E-mail</label>
+            <input
+              id="clientEmail"
+              name="email"
+              type="email"
+              class="field"
+              placeholder="cliente@email.com"
+              autocomplete="email"
+              maxlength="254"
+            >
+          </div>
+
+          <div>
+            <label class="field-label" for="clientPhone">Telefone</label>
+            <input
+              id="clientPhone"
+              name="phone"
+              type="tel"
+              class="field"
+              placeholder="(11) 3333-3333"
+              autocomplete="tel"
+              maxlength="20"
+            >
+          </div>
+
+          <div>
+            <label class="field-label" for="clientWhatsapp">WhatsApp</label>
+            <input
+              id="clientWhatsapp"
+              name="whatsapp"
+              type="tel"
+              class="field"
+              placeholder="(11) 99999-9999"
+              maxlength="20"
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-2xl border border-nekko-border bg-nekko-panel p-5 sm:p-7">
+        <div class="mb-6 flex items-start gap-3">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-nekko-orange/10 text-nekko-orange">
+            <i data-lucide="map-pin" class="h-5 w-5"></i>
+          </div>
+          <div>
+            <h3 class="section-title">Endereço</h3>
+            <p class="section-description">Opcional — informe o endereço do cliente quando necessário.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <label class="field-label" for="clientZipCode">CEP</label>
+            <input
+              id="clientZipCode"
+              name="zip_code"
+              type="text"
+              class="field"
+              placeholder="00000-000"
+              autocomplete="postal-code"
+              maxlength="9"
+            >
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="field-label" for="clientStreet">Rua / Avenida</label>
+            <input
+              id="clientStreet"
+              name="street"
+              type="text"
+              class="field"
+              placeholder="Nome da rua ou avenida"
+              autocomplete="street-address"
+              maxlength="200"
+            >
+          </div>
+
+          <div>
+            <label class="field-label" for="clientNumber">Número</label>
+            <input
+              id="clientNumber"
+              name="number"
+              type="text"
+              class="field"
+              placeholder="Ex.: 123"
+              maxlength="20"
+            >
+          </div>
+
+          <div>
+            <label class="field-label" for="clientComplement">Complemento</label>
+            <input
+              id="clientComplement"
+              name="complement"
+              type="text"
+              class="field"
+              placeholder="Apto., bloco, referência..."
+              maxlength="100"
+            >
+          </div>
+
+          <div>
+            <label class="field-label" for="clientNeighborhood">Bairro</label>
+            <input
+              id="clientNeighborhood"
+              name="neighborhood"
+              type="text"
+              class="field"
+              placeholder="Nome do bairro"
+              maxlength="100"
+            >
+          </div>
+
+          <div>
+            <label class="field-label" for="clientCity">Cidade</label>
+            <input
+              id="clientCity"
+              name="city"
+              type="text"
+              class="field"
+              placeholder="Nome da cidade"
+              autocomplete="address-level2"
+              maxlength="100"
+            >
+          </div>
+
+          <div>
+            <label class="field-label" for="clientState">Estado (UF)</label>
+            <input
+              id="clientState"
+              name="state"
+              type="text"
+              class="field"
+              placeholder="Ex.: SP"
+              autocomplete="address-level1"
+              maxlength="2"
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-2xl border border-nekko-border bg-nekko-panel p-5 sm:p-7">
+        <div class="mb-6 flex items-start gap-3">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-nekko-orange/10 text-nekko-orange">
+            <i data-lucide="notebook-pen" class="h-5 w-5"></i>
+          </div>
+          <div>
+            <h3 class="section-title">Observações</h3>
+            <p class="section-description">Anotações internas para consultar futuramente.</p>
+          </div>
+        </div>
+
+        <label class="field-label" for="clientNotes">Observações do cliente</label>
+        <textarea
+          id="clientNotes"
+          name="notes"
+          class="field min-h-28 resize-y"
+          placeholder="Preferências, detalhes de atendimento ou outras informações relevantes..."
+          maxlength="5000"
+          rows="4"
+        ></textarea>
+      </section>
+
+      <div
+        id="clientFormMessage"
+        class="hidden rounded-xl border px-4 py-3 text-sm"
+        role="alert"
+        aria-live="polite"
+      ></div>
+
+      <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <a
+          href="clients.html"
+          class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-nekko-border px-5 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/5"
+        >
+          <i data-lucide="x" class="h-4 w-4"></i>
+          Cancelar
+        </a>
+
+        <button
+          id="saveClientButton"
+          type="submit"
+          class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-nekko-orange px-6 py-3 text-sm font-semibold text-black transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <i data-lucide="user-round-plus" class="h-4 w-4"></i>
+          <span id="saveClientButtonText">Salvar cliente</span>
+        </button>
+      </div>
+
+      <p class="text-center text-xs text-nekko-muted">
+        Os campos marcados com <span class="text-nekko-orange">*</span> são obrigatórios.
+      </p>
+    </form>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../assets/js/config.js"></script>
+  <script src="../../assets/js/supabase.js"></script>
+  <script src="../../assets/js/auth.js"></script>
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/storage.js"></script>
+  <script src="../../assets/js/bootstrap.js"></script>
+  <script src="createclient.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>
