@@ -360,6 +360,28 @@
         <footer class="border-t border-[#292929] py-5 text-center text-xs text-gray-600">NEKKO WD · Gestão inteligente
             para marcenarias</footer>
     </main>
+
+    <div id="statusModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="statusModalTitle">
+      <div class="w-full max-w-md rounded-2xl border border-[#343434] bg-[#111] p-6 shadow-2xl">
+        <div class="flex items-start justify-between gap-4">
+          <div><p class="text-xs font-bold uppercase tracking-[.18em] text-[#F28A3D]">Atualização rápida</p><h2 id="statusModalTitle" class="mt-2 text-xl font-bold">Alterar status</h2><p id="statusProjectName" class="mt-1 text-sm text-gray-400"></p></div>
+          <button type="button" data-close-modal="statusModal" class="rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-white" aria-label="Fechar"><i data-lucide="x"></i></button>
+        </div>
+        <label for="statusSelect" class="mt-5 block text-sm font-medium text-gray-300">Novo status</label>
+        <select id="statusSelect" class="mt-2 w-full rounded-xl border border-[#343434] bg-[#090909] p-3 text-white">
+          <option value="QUOTE">Orçamento</option><option value="PENDING">Pendente</option><option value="IN_PROGRESS">Em andamento</option><option value="COMPLETED">Concluído</option><option value="DELIVERED">Entregue</option><option value="CANCELLED">Cancelado</option>
+        </select>
+        <p id="statusModalError" class="mt-3 hidden text-sm text-red-300"></p>
+        <div class="mt-6 flex justify-end gap-3"><button type="button" data-close-modal="statusModal" class="rounded-xl border border-[#333] px-4 py-2.5 text-sm font-semibold text-gray-300 hover:bg-white/5">Cancelar</button><button id="saveStatusButton" type="button" class="primary rounded-xl px-5 py-2.5 text-sm font-bold">Salvar status</button></div>
+      </div>
+    </div>
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+      <div class="w-full max-w-md rounded-2xl border border-[#343434] bg-[#111] p-6 shadow-2xl">
+        <div class="flex items-start gap-4"><div class="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-red-950/60 text-red-300"><i data-lucide="trash-2" class="h-5 w-5"></i></div><div class="min-w-0 flex-1"><h2 id="deleteModalTitle" class="text-lg font-bold">Excluir projeto?</h2><p class="mt-1 text-sm leading-6 text-gray-400">Essa ação não pode ser desfeita. O projeto selecionado será removido do sistema.</p><p id="deleteProjectName" class="mt-3 break-words rounded-lg border border-[#292929] bg-[#090909] p-3 text-sm font-semibold text-gray-200"></p></div></div>
+        <p id="deleteModalError" class="mt-3 hidden text-sm text-red-300"></p>
+        <div class="mt-6 flex justify-end gap-3"><button type="button" data-close-modal="deleteModal" class="rounded-xl border border-[#333] px-4 py-2.5 text-sm font-semibold text-gray-300 hover:bg-white/5">Cancelar</button><button id="confirmDeleteButton" type="button" class="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-red-500">Sim, excluir</button></div>
+      </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../assets/js/config.js"></script>
     <script src="../../assets/js/supabase.js"></script>
@@ -390,11 +412,55 @@
                 $('undo').onclick = () => {if (strokes.length) {strokes.pop(); dirty(); draw();} }; $('clear').onclick = () => {if (strokes.length && confirm('Apagar todo o desenho deste projeto?')) {strokes = []; activeStroke = null; dirty(); draw();} }; $('strokeWidth').oninput = () => $('widthValue').textContent = $('strokeWidth').value;
                 const originalDown = c.onpointerdown; c.addEventListener('pointerdown', () => { }); resizeObserver = new ResizeObserver(resize); resizeObserver.observe(c); resize();
             }
-            async function loadClients() {let q = scope(window.supabaseClient.from('clients').select('id,name').eq('company_id', ctx.company_id).order('name')); const {data, error} = await q.limit(500); if (error) throw error; clients = data || []; $('clientId').innerHTML = '<option value="">Sem cliente vinculado</option>' + clients.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');}
+            async function loadClients() {let q = scope(window.supabaseClient.from('clients').select('id,name,phone,whatsapp').eq('company_id', ctx.company_id).order('name')); const {data, error} = await q.limit(500); if (error) throw error; clients = data || []; $('clientId').innerHTML = '<option value="">Sem cliente vinculado</option>' + clients.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');}
             async function loadProjects() {let q = scope(window.supabaseClient.from('woodworking_projects').select('id,project_number,client_id,title,service_name,environment_type,status,width_mm,length_mm,height_mm,area_m2,material_type,material_color,material_thickness_mm,estimated_value,final_value,deadline,description,notes,sketch_data,created_at').eq('company_id', ctx.company_id).order('created_at', {ascending: false})); const {data, error} = await q.limit(500); if (error) throw error; projects = data || []; stats(); render();}
             function stats() {$('total').textContent = projects.length; $('progress').textContent = projects.filter(p => p.status === 'IN_PROGRESS').length; $('pending').textContent = projects.filter(p => p.status === 'PENDING').length; $('revenue').textContent = money.format(projects.filter(p => p.status !== 'CANCELLED').reduce((s, p) => s + Number(p.estimated_value || 0), 0));}
             function clientName(id) {return clients.find(c => c.id === id)?.name || 'Cliente não vinculado';}
-            function render() {const term = $('search').value.trim().toLocaleLowerCase('pt-BR'), filter = $('filter').value; const rows = projects.filter(p => (!filter || p.status === filter) && (!term || [p.title, p.service_name, clientName(p.client_id), p.project_number].some(v => String(v || '').toLocaleLowerCase('pt-BR').includes(term)))); $('empty').classList.toggle('hidden', rows.length > 0); $('list').innerHTML = rows.map(p => `<article class="panel p-5"><div class="flex items-start justify-between gap-3"><div><p class="text-xs text-gray-500">#${esc(p.project_number || '—')}</p><h3 class="mt-1 font-bold">${esc(p.title)}</h3><p class="mt-1 text-sm text-gray-400">${esc(clientName(p.client_id))}</p></div><span class="badge ${esc(p.status)}">${esc(labels[p.status] || p.status)}</span></div><div class="mt-4 grid grid-cols-2 gap-4 border-y border-[#292929] py-4"><div><p class="text-xs text-gray-500">Ambiente / serviço</p><p class="mt-1 text-sm">${esc(p.environment_type || p.service_name || 'Não informado')}</p></div><div><p class="text-xs text-gray-500">Valor</p><p class="mt-1 font-bold text-[#F28A3D]">${esc(money.format(p.final_value ?? p.estimated_value ?? 0))}</p></div><div><p class="text-xs text-gray-500">Prazo</p><p class="mt-1 text-sm">${esc(p.deadline ? String(p.deadline).split('-').reverse().join('/') : 'Não definido')}</p></div><div><p class="text-xs text-gray-500">Área</p><p class="mt-1 text-sm">${p.area_m2 == null ? 'Não informada' : esc(p.area_m2) + ' m²'}</p></div></div>${p.material_type || p.material_color ? `<p class="mt-3 text-sm text-gray-400">${esc([p.material_type, p.material_color, p.material_thickness_mm ? `${p.material_thickness_mm} mm` : null].filter(Boolean).join(' · '))}</p>` : ''}${p.sketch_data?.strokes?.length ? '<p class="mt-3 text-xs text-[#F28A3D]">✎ Desenho salvo</p>' : ''}${p.description ? `<p class="mt-3 text-sm text-gray-400">${esc(p.description)}</p>` : ''}<div class="mt-4 flex gap-2"><button class="tool" data-edit="${esc(p.id)}">Editar</button><button class="tool" data-status="${esc(p.id)}">Alterar status</button></div></article>`).join(''); lucide.createIcons();}
+            function render() {
+                const term = $('search').value.trim().toLocaleLowerCase('pt-BR');
+                const filter = $('filter').value;
+                const rows = projects.filter(p =>
+                    (!filter || p.status === filter) &&
+                    (!term || [p.title, p.service_name, clientName(p.client_id), p.project_number]
+                        .some(v => String(v || '').toLocaleLowerCase('pt-BR').includes(term)))
+                );
+                $('empty').classList.toggle('hidden', rows.length > 0);
+                $('list').innerHTML = rows.map(p => {
+                    const client = clients.find(c => c.id === p.client_id);
+                    const clientPhone = String(client?.whatsapp || client?.phone || '').replace(/\D/g, '');
+                    let whatsappDigits = clientPhone;
+                    if (whatsappDigits.startsWith('0')) whatsappDigits = whatsappDigits.replace(/^0+/, '');
+                    if (whatsappDigits && !whatsappDigits.startsWith('55')) whatsappDigits = '55' + whatsappDigits;
+                    const whatsappMessage = `Olá ${client?.name || 'tudo bem'}! Estou entrando em contato sobre o projeto "${p.title}". No momento, o status dele está como "${labels[p.status] || p.status}". Se precisar de alguma informação, fico à disposição!`;
+                    const whatsappUrl = whatsappDigits ? `https://wa.me/${whatsappDigits}?text=${encodeURIComponent(whatsappMessage)}` : '';
+                    const statusLabel = labels[p.status] || p.status || 'Sem status';
+                    return `<article class="panel group min-w-0 rounded-2xl border border-[#292929] p-4 transition duration-200 hover:border-[#4a382b] hover:shadow-lg hover:shadow-black/20 sm:p-5">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                          <p class="text-[11px] font-semibold uppercase tracking-[.14em] text-gray-500">Projeto ${esc(p.project_number ? '#' + p.project_number : '')}</p>
+                          <h3 class="mt-1 break-words text-base font-bold leading-snug text-white sm:text-lg">${esc(p.title)}</h3>
+                          <p class="mt-1 text-sm text-gray-400">${esc(clientName(p.client_id))}</p>
+                        </div>
+                        <button type="button" class="badge ${esc(p.status)} shrink-0 cursor-pointer border border-white/10 transition hover:brightness-125 focus:outline-none focus:ring-2 focus:ring-[#F28A3D]" data-status-toggle="${esc(p.id)}" title="Clique para alterar o status" aria-label="Status ${esc(statusLabel)}. Clique para alterar">${esc(statusLabel)} <span aria-hidden="true">⌄</span></button>
+                      </div>
+                      <div class="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-[#292929] py-3">
+                        <div class="min-w-0"><p class="text-[11px] font-medium uppercase tracking-wide text-gray-500">Ambiente / serviço</p><p class="mt-1 break-words text-sm text-gray-200">${esc(p.environment_type || p.service_name || 'Não informado')}</p></div>
+                        <div class="min-w-0"><p class="text-[11px] font-medium uppercase tracking-wide text-gray-500">Valor</p><p class="mt-1 text-sm font-bold text-[#F28A3D]">${esc(money.format(p.final_value ?? p.estimated_value ?? 0))}</p></div>
+                        <div class="min-w-0"><p class="text-[11px] font-medium uppercase tracking-wide text-gray-500">Prazo</p><p class="mt-1 text-sm text-gray-200">${esc(p.deadline ? String(p.deadline).split('-').reverse().join('/') : 'Não definido')}</p></div>
+                        <div class="min-w-0"><p class="text-[11px] font-medium uppercase tracking-wide text-gray-500">Área</p><p class="mt-1 text-sm text-gray-200">${p.area_m2 == null ? 'Não informada' : esc(p.area_m2) + ' m²'}</p></div>
+                      </div>
+                      ${p.material_type || p.material_color ? `<p class="mt-3 text-xs text-gray-400">${esc([p.material_type, p.material_color, p.material_thickness_mm ? `${p.material_thickness_mm} mm` : null].filter(Boolean).join(' · '))}</p>` : ''}
+                      ${p.sketch_data?.strokes?.length ? '<p class="mt-3 text-xs text-[#F28A3D]">✎ Desenho salvo</p>' : ''}
+                      ${p.description ? `<p class="mt-3 line-clamp-2 text-sm leading-5 text-gray-400">${esc(p.description)}</p>` : ''}
+                      <div class="mt-4 flex flex-wrap items-center gap-2 border-t border-[#292929] pt-3">
+                        <button type="button" class="inline-flex items-center gap-1.5 rounded-lg border border-[#343434] px-3 py-2 text-xs font-semibold text-gray-200 transition hover:border-[#F28A3D]/60 hover:bg-[#2c1a10]" data-edit="${esc(p.id)}"><i data-lucide="pencil" class="h-3.5 w-3.5"></i>Editar</button>
+                        ${whatsappUrl ? `<a href="${esc(whatsappUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-lg border border-emerald-900/70 bg-emerald-950/30 px-3 py-2 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-900/50"><i data-lucide="message-circle" class="h-3.5 w-3.5"></i>WhatsApp</a>` : `<button type="button" disabled title="Cadastre um telefone ou WhatsApp para este cliente" class="inline-flex cursor-not-allowed items-center gap-1.5 rounded-lg border border-[#292929] px-3 py-2 text-xs font-semibold text-gray-600"><i data-lucide="message-circle" class="h-3.5 w-3.5"></i>Sem telefone</button>`}
+                        <button type="button" class="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-red-950 px-3 py-2 text-xs font-semibold text-red-300 transition hover:border-red-800 hover:bg-red-950/40" data-delete="${esc(p.id)}"><i data-lucide="trash-2" class="h-3.5 w-3.5"></i>Excluir</button>
+                      </div>
+                    </article>`;
+                }).join('');
+                lucide.createIcons();
+            }
             function openForm(p = null) {editId = p?.id || null; $('form').reset(); hide($('formMessage')); $('formTitle').textContent = p ? 'Editar projeto' : 'Novo projeto'; $('save').textContent = p ? 'Salvar alterações' : 'Salvar projeto'; if (p) {const map = {clientId: 'client_id', title: 'title', service: 'service_name', environment: 'environment_type', status: 'status', deadline: 'deadline', width: 'width_mm', length: 'length_mm', height: 'height_mm', area: 'area_m2', material: 'material_type', color: 'material_color', thickness: 'material_thickness_mm', estimated: 'estimated_value', final: 'final_value', description: 'description', notes: 'notes'}; for (const [id, key] of Object.entries(map)) $(id).value = p[key] ?? '';} sketchLoad(p); $('formSection').classList.remove('hidden'); requestAnimationFrame(resize); $('formSection').scrollIntoView({behavior: 'smooth'});}
             function closeForm() {if ($('sketchState').textContent.includes('alterado') && !confirm('O desenho não foi salvo. Fechar mesmo assim?')) return; $('formSection').classList.add('hidden'); $('form').reset(); editId = null; sketchLoad(null);}
             async function save(e) {
@@ -404,7 +470,60 @@
                 if (!editId) payload.created_by = user.id;
                 try {let r = editId ? await window.supabaseClient.from('woodworking_projects').update(payload).eq('id', editId).eq('company_id', ctx.company_id).select('id').maybeSingle() : await window.supabaseClient.from('woodworking_projects').insert(payload).select('id').single(); if (r.error) throw r.error; if (!r.data) throw new Error('Nenhum registro foi atualizado. Verifique as permissões do Supabase.'); $('sketchState').textContent = strokes.length ? 'Desenho salvo no projeto' : 'Projeto salvo sem desenho'; message($('formMessage'), editId ? 'Projeto atualizado!' : 'Projeto cadastrado! ', true); await loadProjects(); setTimeout(() => {$('formSection').classList.add('hidden'); editId = null; hide($('formMessage'));}, 650);} catch (err) {console.error(err); message($('formMessage'), err?.message || 'Não foi possível salvar. Verifique a conexão e as políticas RLS.');} finally {busy = false; $('save').disabled = false; $('save').textContent = editId ? 'Salvar alterações' : 'Salvar projeto';}
             }
-            async function changeStatus(p) {const v = prompt('Digite o status:\n' + Object.entries(labels).map(([k, v]) => `${k} = ${v}`).join('\n'), p.status); if (v === null) return; const s = v.trim().toUpperCase(); if (!labels[s]) {alert('Status inválido.'); return;} const {error} = await window.supabaseClient.from('woodworking_projects').update({status: s}).eq('id', p.id).eq('company_id', ctx.company_id); if (error) alert(error.message); else await loadProjects();}
+            let selectedStatusProjectId = null;
+            let selectedDeleteProjectId = null;
+            function openModal(id) { const el = $(id); el.classList.remove('hidden'); el.classList.add('flex'); document.body.classList.add('overflow-hidden'); lucide.createIcons(); }
+            function closeModal(id) { const el = $(id); el.classList.add('hidden'); el.classList.remove('flex'); if ($('statusModal').classList.contains('hidden') && $('deleteModal').classList.contains('hidden')) document.body.classList.remove('overflow-hidden'); }
+            function openStatusModal(project) {
+                selectedStatusProjectId = project.id;
+                $('statusProjectName').textContent = project.title;
+                $('statusSelect').value = project.status || 'QUOTE';
+                $('statusModalError').classList.add('hidden');
+                openModal('statusModal');
+            }
+            async function saveStatus() {
+                if (!selectedStatusProjectId) return;
+                const button = $('saveStatusButton');
+                button.disabled = true; button.textContent = 'Salvando...';
+                try {
+                    const { error } = await window.supabaseClient.from('woodworking_projects')
+                        .update({ status: $('statusSelect').value })
+                        .eq('id', selectedStatusProjectId).eq('company_id', ctx.company_id);
+                    if (error) throw error;
+                    closeModal('statusModal');
+                    selectedStatusProjectId = null;
+                    await loadProjects();
+                } catch (err) {
+                    $('statusModalError').textContent = err?.message || 'Não foi possível atualizar o status.';
+                    $('statusModalError').classList.remove('hidden');
+                } finally {
+                    button.disabled = false; button.textContent = 'Salvar status';
+                }
+            }
+            function openDeleteModal(project) {
+                selectedDeleteProjectId = project.id;
+                $('deleteProjectName').textContent = project.title;
+                $('deleteModalError').classList.add('hidden');
+                openModal('deleteModal');
+            }
+            async function deleteProject() {
+                if (!selectedDeleteProjectId) return;
+                const button = $('confirmDeleteButton');
+                button.disabled = true; button.textContent = 'Excluindo...';
+                try {
+                    const { error } = await window.supabaseClient.from('woodworking_projects')
+                        .delete().eq('id', selectedDeleteProjectId).eq('company_id', ctx.company_id);
+                    if (error) throw error;
+                    closeModal('deleteModal');
+                    selectedDeleteProjectId = null;
+                    await loadProjects();
+                } catch (err) {
+                    $('deleteModalError').textContent = err?.message || 'Não foi possível excluir o projeto.';
+                    $('deleteModalError').classList.remove('hidden');
+                } finally {
+                    button.disabled = false; button.textContent = 'Sim, excluir';
+                }
+            }
             async function init() {
                 try {
                     const { data, error } = await window.supabaseClient.auth.getSession();
@@ -448,7 +567,19 @@
             }
             $('newTop').onclick = () => openForm(); $('newEmpty').onclick = () => openForm(); $('close').onclick = closeForm; $('cancel').onclick = closeForm; $('form').addEventListener('submit', save); $('search').oninput = render; $('filter').onchange = render;
             $('calcArea').onclick = () => {const w = num($('width').value), l = num($('length').value); if (!w || !l) {message($('formMessage'), 'Informe largura e comprimento maiores que zero.'); return;} $('area').value = ((w / 1000) * (l / 1000)).toFixed(2); hide($('formMessage'));};
-            $('list').addEventListener('click', e => {const a = e.target.closest('[data-edit]'), b = e.target.closest('[data-status]'); if (a) {const p = projects.find(x => x.id === a.dataset.edit); if (p) openForm(p);} if (b) {const p = projects.find(x => x.id === b.dataset.status); if (p) changeStatus(p);} });
+            $('list').addEventListener('click', e => {
+                const editButton = e.target.closest('[data-edit]');
+                const statusButton = e.target.closest('[data-status-toggle]');
+                const deleteButton = e.target.closest('[data-delete]');
+                if (editButton) { const p = projects.find(x => x.id === editButton.dataset.edit); if (p) openForm(p); }
+                if (statusButton) { const p = projects.find(x => x.id === statusButton.dataset.statusToggle); if (p) openStatusModal(p); }
+                if (deleteButton) { const p = projects.find(x => x.id === deleteButton.dataset.delete); if (p) openDeleteModal(p); }
+            });
+            $('saveStatusButton').addEventListener('click', saveStatus);
+            $('confirmDeleteButton').addEventListener('click', deleteProject);
+            document.querySelectorAll('[data-close-modal]').forEach(button => button.addEventListener('click', () => closeModal(button.dataset.closeModal)));
+            ['statusModal', 'deleteModal'].forEach(id => $(id).addEventListener('click', e => { if (e.target === $(id)) closeModal(id); }));
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal('statusModal'); closeModal('deleteModal'); } });
             initCanvasFix(); init();
             function initCanvasFix() {initCanvas(); const c = $('sketchCanvas'); c.addEventListener('pointerdown', () => {tool = document.querySelector('[data-tool].active')?.dataset.tool || 'pen'; if (activeStroke) activeStroke.tool = tool;});}
         })();
