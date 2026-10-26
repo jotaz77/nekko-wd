@@ -467,6 +467,11 @@
       return;
     }
 
+    if (page === 'clients') {
+      window.location.href = '../clients/clients.html';
+      return;
+    }
+
     document.querySelectorAll('[data-page]').forEach((button) => {
       button.classList.toggle(
         'active',
@@ -494,27 +499,12 @@
   }
 
   function setupProjectActions() {
-    // Localiza as ações pelo texto para funcionar mesmo que o HTML
-    // não possua um ID específico nesses botões.
-    document.querySelectorAll('a, button').forEach((element) => {
-      const text = element.textContent?.trim().toLowerCase();
-
-      if (!text) return;
-
-      if (text === 'novo serviço' || text === 'novo projeto') {
-        element.addEventListener('click', (event) => {
-          event.preventDefault();
-          window.location.href = '../projects/createproject.html';
-        });
-        return;
-      }
-
-      if (text === 'serviços' || text === 'projetos e serviços') {
-        element.addEventListener('click', (event) => {
-          event.preventDefault();
-          window.location.href = '../projects/projects.html';
-        });
-      }
+    // O botão de novo serviço usa uma ação explícita, separada da listagem.
+    document.querySelectorAll('[data-action="new-project"]').forEach((element) => {
+      element.addEventListener('click', (event) => {
+        event.preventDefault();
+        window.location.href = '../projects/createproject.html';
+      });
     });
   }
 
