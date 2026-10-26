@@ -133,7 +133,7 @@
             </span>
 
             <div class="flex flex-wrap gap-2">
-              <a href="client-details.html?id=${id}" class="muted-button inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold">
+              <a href="../projects/projects.html?client_id=${id}" class="muted-button inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold">
                 <i data-lucide="folder-open" class="h-3.5 w-3.5"></i>
                 Ver projetos
               </a>
@@ -141,11 +141,6 @@
               <a href="../projects/createproject.html?client_id=${id}" class="primary inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold">
                 <i data-lucide="plus" class="h-3.5 w-3.5"></i>
                 Novo serviço
-              </a>
-
-              <a href="client-details.html?id=${id}&action=print" class="muted-button inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold" aria-label="Imprimir Ordem de Serviço de ${escapeHTML(name)}">
-                <i data-lucide="printer" class="h-3.5 w-3.5"></i>
-                Imprimir OS
               </a>
 
               ${whatsapp ? `
@@ -221,10 +216,9 @@
       .eq('company_id', context.company_id)
       .not('client_id', 'is', null);
 
-    if (context.active_store_id) {
-      projectQuery = projectQuery.eq('store_id', context.active_store_id);
-    }
-
+    // Count all projects belonging to this company and linked to a client.
+    // Do not filter by active_store_id: existing projects may belong to another store
+    // or have no store_id, but still belong to the same client/company.
     const { data: projects, error: projectError } = await projectQuery.limit(5000);
 
     if (projectError) {
