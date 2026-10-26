@@ -31,6 +31,47 @@
     return String(value ?? '').replace(/\D/g, '');
   }
 
+  // Normaliza números brasileiros para o formato internacional usado pelo WhatsApp.
+  // Ex.: (11) 98765-4321 -> 5511987654321.
+  function normalizeBrazilWhatsApp(value) {
+    let number = digits(value);
+    if (!number) return '';
+
+    // Remove prefixo de discagem internacional, se salvo como 0055...
+    if (number.startsWith('00')) number = number.slice(2);
+
+    // DDD + telefone brasileiro sem código do país.
+    if (number.length === 10 || number.length === 11) {
+      return `55${number}`;
+    }
+
+    // Número já contém o código do Brasil: 55 + DDD + telefone.
+    if (number.startsWith('55') && (number.length === 12 || number.length === 13)) {
+      return number;
+    }
+
+    if (number.startsWith('0')) {
+      // Prefixo nacional simples: 0 + DDD + telefone.
+      if (number.length === 11 || number.length === 12) {
+        const localNumber = number.slice(1);
+        if (localNumber.length === 10 || localNumber.length === 11) {
+          return `55${localNumber}`;
+        }
+      }
+
+      // Prefixo nacional com código da operadora: 0 + operadora + DDD + telefone.
+      if (number.length === 13 || number.length === 14) {
+        const localNumber = number.slice(3);
+        if (localNumber.length === 10 || localNumber.length === 11) {
+          return `55${localNumber}`;
+        }
+      }
+    }
+
+    // Não corta dígitos de números inválidos para evitar contato incorreto.
+    return '';
+  }
+
   function showMessage(message) {
     const el = $('clientMessage');
     if (!el) return;
@@ -96,7 +137,7 @@
       const doc = String(client.document || '').trim() || 'Documento não informado';
       const email = String(client.email || '').trim();
       const total = projectCounts.get(client.id) || 0;
-      const phoneDigits = digits(client.whatsapp || client.phone);
+      const phoneDigits = normalizeBrazilWhatsApp(client.whatsapp || client.phone);
       const whatsapp = phoneDigits ? `https://wa.me/${phoneDigits}` : '';
 
       return `
