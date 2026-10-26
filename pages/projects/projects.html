@@ -391,7 +391,47 @@
                 const originalDown = c.onpointerdown; c.addEventListener('pointerdown', () => { }); resizeObserver = new ResizeObserver(resize); resizeObserver.observe(c); resize();
             }
             async function loadClients() {let q = scope(window.supabaseClient.from('clients').select('id,name').eq('company_id', ctx.company_id).order('name')); const {data, error} = await q.limit(500); if (error) throw error; clients = data || []; $('clientId').innerHTML = '<option value="">Sem cliente vinculado</option>' + clients.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');}
-            async function loadProjects() {let q = scope(window.supabaseClient.from('woodworking_projects').select('id,project_number,client_id,title,service_name,environment_type,status,width_mm,length_mm,height_mm,area_m2,material_type,material_color,material_thickness_mm,estimated_value,final_value,deadline,description,notes,sketch_data,created_at').eq('company_id', ctx.company_id).order('created_at', {ascending: false})); const {data, error} = await q.limit(500); if (error) throw error; projects = data || []; stats(); render();}
+            async function init() {
+                try {
+                    const { data, error } = await window.supabaseClient.auth.getSession();
+                    if (error) throw error;
+
+                    if (!data.session) {
+                        window.location.href = '../login/login.html';
+                        return;
+                    }
+
+                    user = data.session.user;
+                    const result = await window.NekkoBootstrap.init();
+
+                    if (!result || result.status !== 'ready') {
+                        if (result?.status === 'unauthenticated') {
+                            window.location.href = '../login/login.html';
+                        } else if (result?.status === 'no_store') {
+                            window.location.href = '../onboarding/stores.html';
+                        } else {
+                            window.location.href = '../onboarding/company.html';
+                        }
+                        return;
+                    }
+
+                    // bootstrap.js retorna company_id e active_store_id diretamente,
+                    // não dentro de result.context.
+                    ctx = {
+                        ...result,
+                        store_id: result.active_store_id || null
+                    };
+
+                    if (!ctx.company_id) {
+                        throw new Error('Empresa ativa não identificada.');
+                    }
+
+                    await Promise.all([loadClients(), loadProjects()]);
+                } catch (e) {
+                    console.error(e);
+                    message($('pageMessage'), e.message || 'Erro ao carregar projetos.');
+                }
+            }
             function stats() {$('total').textContent = projects.length; $('progress').textContent = projects.filter(p => p.status === 'IN_PROGRESS').length; $('pending').textContent = projects.filter(p => p.status === 'PENDING').length; $('revenue').textContent = money.format(projects.filter(p => p.status !== 'CANCELLED').reduce((s, p) => s + Number(p.estimated_value || 0), 0));}
             function clientName(id) {return clients.find(c => c.id === id)?.name || 'Cliente não vinculado';}
             function render() {const term = $('search').value.trim().toLocaleLowerCase('pt-BR'), filter = $('filter').value; const rows = projects.filter(p => (!filter || p.status === filter) && (!term || [p.title, p.service_name, clientName(p.client_id), p.project_number].some(v => String(v || '').toLocaleLowerCase('pt-BR').includes(term)))); $('empty').classList.toggle('hidden', rows.length > 0); $('list').innerHTML = rows.map(p => `<article class="panel p-5"><div class="flex items-start justify-between gap-3"><div><p class="text-xs text-gray-500">#${esc(p.project_number || '—')}</p><h3 class="mt-1 font-bold">${esc(p.title)}</h3><p class="mt-1 text-sm text-gray-400">${esc(clientName(p.client_id))}</p></div><span class="badge ${esc(p.status)}">${esc(labels[p.status] || p.status)}</span></div><div class="mt-4 grid grid-cols-2 gap-4 border-y border-[#292929] py-4"><div><p class="text-xs text-gray-500">Ambiente / serviço</p><p class="mt-1 text-sm">${esc(p.environment_type || p.service_name || 'Não informado')}</p></div><div><p class="text-xs text-gray-500">Valor</p><p class="mt-1 font-bold text-[#F28A3D]">${esc(money.format(p.final_value ?? p.estimated_value ?? 0))}</p></div><div><p class="text-xs text-gray-500">Prazo</p><p class="mt-1 text-sm">${esc(p.deadline ? String(p.deadline).split('-').reverse().join('/') : 'Não definido')}</p></div><div><p class="text-xs text-gray-500">Área</p><p class="mt-1 text-sm">${p.area_m2 == null ? 'Não informada' : esc(p.area_m2) + ' m²'}</p></div></div>${p.material_type || p.material_color ? `<p class="mt-3 text-sm text-gray-400">${esc([p.material_type, p.material_color, p.material_thickness_mm ? `${p.material_thickness_mm} mm` : null].filter(Boolean).join(' · '))}</p>` : ''}${p.sketch_data?.strokes?.length ? '<p class="mt-3 text-xs text-[#F28A3D]">✎ Desenho salvo</p>' : ''}${p.description ? `<p class="mt-3 text-sm text-gray-400">${esc(p.description)}</p>` : ''}<div class="mt-4 flex gap-2"><button class="tool" data-edit="${esc(p.id)}">Editar</button><button class="tool" data-status="${esc(p.id)}">Alterar status</button></div></article>`).join(''); lucide.createIcons();}
