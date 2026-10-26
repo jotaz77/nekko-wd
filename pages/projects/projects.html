@@ -405,7 +405,47 @@
                 try {let r = editId ? await window.supabaseClient.from('woodworking_projects').update(payload).eq('id', editId).eq('company_id', ctx.company_id).select('id').maybeSingle() : await window.supabaseClient.from('woodworking_projects').insert(payload).select('id').single(); if (r.error) throw r.error; if (!r.data) throw new Error('Nenhum registro foi atualizado. Verifique as permissões do Supabase.'); $('sketchState').textContent = strokes.length ? 'Desenho salvo no projeto' : 'Projeto salvo sem desenho'; message($('formMessage'), editId ? 'Projeto atualizado!' : 'Projeto cadastrado! ', true); await loadProjects(); setTimeout(() => {$('formSection').classList.add('hidden'); editId = null; hide($('formMessage'));}, 650);} catch (err) {console.error(err); message($('formMessage'), err?.message || 'Não foi possível salvar. Verifique a conexão e as políticas RLS.');} finally {busy = false; $('save').disabled = false; $('save').textContent = editId ? 'Salvar alterações' : 'Salvar projeto';}
             }
             async function changeStatus(p) {const v = prompt('Digite o status:\n' + Object.entries(labels).map(([k, v]) => `${k} = ${v}`).join('\n'), p.status); if (v === null) return; const s = v.trim().toUpperCase(); if (!labels[s]) {alert('Status inválido.'); return;} const {error} = await window.supabaseClient.from('woodworking_projects').update({status: s}).eq('id', p.id).eq('company_id', ctx.company_id); if (error) alert(error.message); else await loadProjects();}
-            async function init() {try {const {data, error} = await window.supabaseClient.auth.getSession(); if (error) throw error; if (!data.session) {location.href = '../login/login.html'; return;} user = data.session.user; const r = await window.NekkoBootstrap.init(); if (!r || r.status !== 'ready' || !r.context) {location.href = r?.status === 'no_store' ? '../onboarding/stores.html' : '../onboarding/company.html'; return;} ctx = r.context; if (!ctx.company_id) throw Error('Empresa ativa não identificada.'); await Promise.all([loadClients(), loadProjects()]);} catch (e) {console.error(e); message($('pageMessage'), e.message || 'Erro ao carregar projetos.');} }
+            async function init() {
+                try {
+                    const { data, error } = await window.supabaseClient.auth.getSession();
+                    if (error) throw error;
+
+                    if (!data.session) {
+                        window.location.href = '../login/login.html';
+                        return;
+                    }
+
+                    user = data.session.user;
+                    const result = await window.NekkoBootstrap.init();
+
+                    if (!result || result.status !== 'ready') {
+                        if (result?.status === 'unauthenticated') {
+                            window.location.href = '../login/login.html';
+                        } else if (result?.status === 'no_store') {
+                            window.location.href = '../onboarding/stores.html';
+                        } else {
+                            window.location.href = '../onboarding/company.html';
+                        }
+                        return;
+                    }
+
+                    // bootstrap.js retorna company_id e active_store_id diretamente,
+                    // não dentro de result.context.
+                    ctx = {
+                        ...result,
+                        store_id: result.active_store_id || null
+                    };
+
+                    if (!ctx.company_id) {
+                        throw new Error('Empresa ativa não identificada.');
+                    }
+
+                    await Promise.all([loadClients(), loadProjects()]);
+                } catch (e) {
+                    console.error(e);
+                    message($('pageMessage'), e.message || 'Erro ao carregar projetos.');
+                }
+            }
             $('newTop').onclick = () => openForm(); $('newEmpty').onclick = () => openForm(); $('close').onclick = closeForm; $('cancel').onclick = closeForm; $('form').addEventListener('submit', save); $('search').oninput = render; $('filter').onchange = render;
             $('calcArea').onclick = () => {const w = num($('width').value), l = num($('length').value); if (!w || !l) {message($('formMessage'), 'Informe largura e comprimento maiores que zero.'); return;} $('area').value = ((w / 1000) * (l / 1000)).toFixed(2); hide($('formMessage'));};
             $('list').addEventListener('click', e => {const a = e.target.closest('[data-edit]'), b = e.target.closest('[data-status]'); if (a) {const p = projects.find(x => x.id === a.dataset.edit); if (p) openForm(p);} if (b) {const p = projects.find(x => x.id === b.dataset.status); if (p) changeStatus(p);} });
