@@ -57,13 +57,73 @@
   }
 
   function scope(query) {
-    // O bootstrap retorna active_store_id diretamente.
-    // Sem loja ativa, a consulta deve falhar fechada em vez de expor dados de outras lojas.
+    // O bootstrap disponibiliza a loja ativa em active_store_id.
+    // Sem loja ativa, falhamos de forma segura em vez de consultar outras lojas.
     if (!ctx?.active_store_id) {
       return query.eq('store_id', '00000000-0000-0000-0000-000000000000');
     }
 
     return query.eq('store_id', ctx.active_store_id);
+  }
+
+  let lastCepRequested = '';
+  let cepRequestSequence = 0;
+
+  function setCepMessage(message, isError = false) {
+    const el = $('clientLookupMessage');
+    if (!el) return;
+
+    el.textContent = message;
+    el.className = 'pb-3 text-xs ' + (isError ? 'text-red-400' : 'text-gray-400');
+  }
+
+  function fillAddressFromCep(address) {
+    if ($('clientStreet')) $('clientStreet').value = address.logradouro || '';
+    if ($('clientNeighborhood')) $('clientNeighborhood').value = address.bairro || '';
+    if ($('clientCity')) $('clientCity').value = address.localidade || '';
+    if ($('clientState')) $('clientState').value = (address.uf || '').toUpperCase();
+
+    // O ViaCEP não fornece número nem complemento; não sobrescrevemos esses campos.
+  }
+
+  async function lookupCep() {
+    const field = $('clientZipCode');
+    if (!field) return;
+
+    const digits = field.value.replace(/\D/g, '').slice(0, 8);
+    field.value = digits.length > 5
+      ? digits.slice(0, 5) + '-' + digits.slice(5)
+      : digits;
+
+    if (digits.length !== 8) {
+      lastCepRequested = '';
+      return;
+    }
+
+    if (digits === lastCepRequested) return;
+    lastCepRequested = digits;
+    const requestId = ++cepRequestSequence;
+    setCepMessage('Buscando endereço pelo CEP...');
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+      if (!response.ok) throw new Error('Não foi possível consultar o CEP.');
+
+      const address = await response.json();
+      if (requestId !== cepRequestSequence) return;
+
+      if (address.erro) {
+        setCepMessage('CEP não encontrado. Confira os números e tente novamente.', true);
+        return;
+      }
+
+      fillAddressFromCep(address);
+      setCepMessage('Endereço preenchido pelo CEP. Confira o número e o complemento.');
+    } catch (error) {
+      if (requestId !== cepRequestSequence) return;
+      setCepMessage('Não foi possível consultar o CEP agora. Você pode preencher o endereço manualmente.', true);
+      console.warn('[NEKKO WD] Falha ao consultar CEP:', error);
+    }
   }
 
   function validateNumberFields() {
@@ -576,6 +636,20 @@
 
   function setupEvents() {
     $('form')?.addEventListener('submit', saveProject);
+
+    $('clientZipCode')?.addEventListener('input', () => {
+      const digits = $('clientZipCode').value.replace(/\D/g, '').slice(0, 8);
+      if (digits.length < 8) {
+        lastCepRequested = '';
+        cepRequestSequence++;
+        $('clientZipCode').value = digits.length > 5
+          ? digits.slice(0, 5) + '-' + digits.slice(5)
+          : digits;
+      } else {
+        lookupCep();
+      }
+    });
+    $('clientZipCode')?.addEventListener('blur', lookupCep);
 
     $('width')?.addEventListener('input', calculateArea);
     $('length')?.addEventListener('input', calculateArea);
