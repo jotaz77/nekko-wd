@@ -57,11 +57,13 @@
   }
 
   function scope(query) {
-    if (ctx?.store_id) {
-      return query.eq('store_id', ctx.store_id);
+    // O bootstrap retorna active_store_id diretamente.
+    // Sem loja ativa, a consulta deve falhar fechada em vez de expor dados de outras lojas.
+    if (!ctx?.active_store_id) {
+      return query.eq('store_id', '00000000-0000-0000-0000-000000000000');
     }
 
-    return query;
+    return query.eq('store_id', ctx.active_store_id);
   }
 
   function validateNumberFields() {
@@ -371,7 +373,7 @@
   function buildPayload() {
     return {
       company_id: ctx.company_id,
-      store_id: ctx.store_id || null,
+      store_id: ctx.active_store_id,
       client_id: $('clientId').value || null,
 
       title: $('title').value.trim(),
