@@ -68,6 +68,9 @@
 
   let lastCepRequested = '';
   let cepRequestSequence = 0;
+  let clientRecordId = null;
+  let clientLookupDocument = '';
+  let clientLookupSequence = 0;
 
   function setCepMessage(message, isError = false) {
     const el = $('clientLookupMessage');
@@ -124,6 +127,209 @@
       setCepMessage('Não foi possível consultar o CEP agora. Você pode preencher o endereço manualmente.', true);
       console.warn('[NEKKO WD] Falha ao consultar CEP:', error);
     }
+  }
+
+  function normalizeDocument(value) {
+    return String(value || '').replace(/\D/g, '');
+  }
+
+  function setClientRecordState(message, isError = false) {
+    const el = $('clientRecordState');
+    if (!el) return;
+    el.textContent = message;
+    el.className = 'rounded-full border px-3 py-1 text-xs ' +
+      (isError
+        ? 'border-red-900 text-red-400'
+        : 'border-[#292929] text-gray-400');
+  }
+
+  function setClientField(id, value) {
+    const field = $(id);
+    if (field) field.value = value ?? '';
+  }
+
+  function fillClientFields(client) {
+    const address = client?.address && typeof client.address === 'object'
+      ? client.address
+      : {};
+
+    setClientField('clientDocument', client?.document || '');
+    setClientField('clientName', client?.name || '');
+    setClientField('clientPhone', client?.phone || '');
+    setClientField('clientWhatsapp', client?.whatsapp || '');
+    setClientField('clientEmail', client?.email || '');
+    setClientField('clientZipCode', address.zip_code || '');
+    setClientField('clientStreet', address.street || '');
+    setClientField('clientNumber', address.number || '');
+    setClientField('clientComplement', address.complement || '');
+    setClientField('clientNeighborhood', address.neighborhood || '');
+    setClientField('clientCity', address.city || '');
+    setClientField('clientState', address.state || '');
+    setClientField('clientId', client?.id || '');
+  }
+
+  function buildClientPayload() {
+    const documentValue = $('clientDocument')?.value.trim() || '';
+    const name = $('clientName')?.value.trim() || '';
+    const documentDigits = normalizeDocument(documentValue);
+
+    if (!ctx?.active_store_id) {
+      throw new Error('Nenhuma loja ativa foi identificada. Selecione uma loja e tente novamente.');
+    }
+    if (!documentDigits) {
+      throw new Error('Informe o CPF ou RG do cliente.');
+    }
+    if (documentDigits.length < 7) {
+      throw new Error('Confira o CPF ou RG informado.');
+    }
+    if (!name) {
+      throw new Error('Informe o nome completo do cliente.');
+    }
+
+    return {
+      company_id: ctx.company_id,
+      store_id: ctx.active_store_id,
+      name,
+      document: documentValue,
+      phone: $('clientPhone')?.value.trim() || null,
+      whatsapp: $('clientWhatsapp')?.value.trim() || null,
+      email: $('clientEmail')?.value.trim() || null,
+      address: {
+        zip_code: $('clientZipCode')?.value.trim() || null,
+        street: $('clientStreet')?.value.trim() || null,
+        number: $('clientNumber')?.value.trim() || null,
+        complement: $('clientComplement')?.value.trim() || null,
+        neighborhood: $('clientNeighborhood')?.value.trim() || null,
+        city: $('clientCity')?.value.trim() || null,
+        state: $('clientState')?.value.trim().toUpperCase() || null
+      }
+    };
+  }
+
+  async function findClientByDocument(documentValue) {
+    const digits = normalizeDocument(documentValue);
+    if (!digits || digits.length < 7) return null;
+    if (!ctx?.company_id || !ctx?.active_store_id) {
+      throw new Error('Não foi possível identificar a empresa e a loja ativa.');
+    }
+
+    const { data, error } = await window.supabaseClient
+      .from('clients')
+      .select('id, company_id, store_id, name, document, email, phone, whatsapp, address')
+      .eq('company_id', ctx.company_id)
+      .eq('store_id', ctx.active_store_id)
+      .limit(500);
+
+    if (error) throw error;
+    return (data || []).find((client) => normalizeDocument(client.document) === digits) || null;
+  }
+
+  async function lookupClientByDocument() {
+    const field = $('clientDocument');
+    if (!field) return;
+
+    const documentValue = field.value.trim();
+    const digits = normalizeDocument(documentValue);
+    if (digits.length < 7) {
+      clientRecordId = null;
+      clientLookupDocument = '';
+      setClientRecordState('Informe CPF ou RG');
+      return;
+    }
+
+    const requestId = ++clientLookupSequence;
+    setClientRecordState('Buscando cliente...');
+    setCepMessage('');
+
+    try {
+      const client = await findClientByDocument(documentValue);
+      if (requestId !== clientLookupSequence) return;
+
+      clientLookupDocument = digits;
+      if (client) {
+        clientRecordId = client.id;
+        fillClientFields(client);
+        setClientRecordState('Cliente encontrado nesta loja');
+        setCepMessage('Cadastro localizado. Confira ou atualize os dados antes de salvar.');
+      } else {
+        clientRecordId = null;
+        setClientField('clientId', '');
+        setClientField('clientName', '');
+        setClientField('clientPhone', '');
+        setClientField('clientWhatsapp', '');
+        setClientField('clientEmail', '');
+        setClientField('clientZipCode', '');
+        setClientField('clientStreet', '');
+        setClientField('clientNumber', '');
+        setClientField('clientComplement', '');
+        setClientField('clientNeighborhood', '');
+        setClientField('clientCity', '');
+        setClientField('clientState', '');
+        setClientRecordState('Novo cliente nesta loja');
+        setCepMessage('Nenhum cadastro encontrado nesta loja. Preencha os dados para cadastrar o cliente.');
+      }
+    } catch (error) {
+      console.error('[NEKKO WD] Erro ao buscar cliente:', error);
+      setClientRecordState('Falha na busca', true);
+      setCepMessage('Não foi possível consultar o cadastro. Verifique a conexão e tente novamente.', true);
+    }
+  }
+
+  async function saveOrUpdateClient() {
+    const payload = buildClientPayload();
+    const documentDigits = normalizeDocument(payload.document);
+
+    // Confere novamente no banco para evitar duplicidade se o usuário digitou
+    // um documento existente sem ter acionado a busca manualmente.
+    const found = await findClientByDocument(payload.document);
+    let targetId = clientRecordId;
+
+    if (targetId && clientLookupDocument && clientLookupDocument !== documentDigits) {
+      targetId = null;
+    }
+
+    if (found && (!targetId || found.id !== targetId)) {
+      targetId = found.id;
+      clientRecordId = found.id;
+      fillClientFields(found);
+      throw new Error('Esse CPF/RG já está cadastrado nesta loja. Os dados foram carregados; confira e salve novamente para atualizar o cliente.');
+    }
+
+    if (targetId) {
+      const { data, error } = await window.supabaseClient
+        .from('clients')
+        .update({
+          name: payload.name,
+          phone: payload.phone,
+          whatsapp: payload.whatsapp,
+          email: payload.email,
+          address: payload.address
+        })
+        .eq('id', targetId)
+        .eq('company_id', ctx.company_id)
+        .eq('store_id', ctx.active_store_id)
+        .select('id')
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw new Error('O cliente não foi atualizado. Verifique as permissões da loja no Supabase.');
+      $('clientId').value = data.id;
+      return data.id;
+    }
+
+    const { data, error } = await window.supabaseClient
+      .from('clients')
+      .insert({ ...payload, created_by: user.id })
+      .select('id')
+      .single();
+
+    if (error) throw error;
+    if (!data?.id) throw new Error('Não foi possível cadastrar o cliente.');
+    clientRecordId = data.id;
+    clientLookupDocument = documentDigits;
+    $('clientId').value = data.id;
+    setClientRecordState('Novo cliente cadastrado');
+    return data.id;
   }
 
   function validateNumberFields() {
@@ -493,7 +699,9 @@
     }
 
     try {
+      const clientId = await saveOrUpdateClient();
       const payload = buildPayload();
+      payload.client_id = clientId;
 
       let result;
 
@@ -581,6 +789,23 @@
 
     editId = data.id;
 
+    if (data.client_id) {
+      const { data: clientData, error: clientError } = await window.supabaseClient
+        .from('clients')
+        .select('id, company_id, store_id, name, document, email, phone, whatsapp, address')
+        .eq('id', data.client_id)
+        .eq('company_id', ctx.company_id)
+        .eq('store_id', ctx.active_store_id)
+        .maybeSingle();
+      if (clientError) throw clientError;
+      if (clientData) {
+        clientRecordId = clientData.id;
+        clientLookupDocument = normalizeDocument(clientData.document);
+        fillClientFields(clientData);
+        setClientRecordState('Cliente vinculado ao projeto');
+      }
+    }
+
     const fields = {
       clientId: 'client_id',
       title: 'title',
@@ -636,6 +861,29 @@
 
   function setupEvents() {
     $('form')?.addEventListener('submit', saveProject);
+
+    $('clientDocument')?.addEventListener('blur', lookupClientByDocument);
+    $('clientDocument')?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        lookupClientByDocument();
+      }
+    });
+    $('clientDocument')?.addEventListener('input', () => {
+      const currentDigits = normalizeDocument($('clientDocument').value);
+      if (clientLookupDocument && currentDigits !== clientLookupDocument) {
+        clientRecordId = null;
+        $('clientId').value = '';
+        for (const id of [
+          'clientName', 'clientPhone', 'clientWhatsapp', 'clientEmail',
+          'clientZipCode', 'clientStreet', 'clientNumber', 'clientComplement',
+          'clientNeighborhood', 'clientCity', 'clientState'
+        ]) {
+          setClientField(id, '');
+        }
+        setClientRecordState('Documento alterado — consulte novamente');
+      }
+    });
 
     $('clientZipCode')?.addEventListener('input', () => {
       const digits = $('clientZipCode').value.replace(/\D/g, '').slice(0, 8);
