@@ -174,13 +174,15 @@ lucide.createIcons();
                     message($('pageMessage'), e.message || 'Erro ao carregar projetos.');
                 }
             }
-            $('newTop').onclick = () => openForm(); $('newEmpty').onclick = () => openForm(); $('close').onclick = closeForm; $('cancel').onclick = closeForm; $('form').addEventListener('submit', save); $('search').oninput = render; $('filter').onchange = render;
+            $('newTop').onclick = () => { window.location.href = 'createproject.html'; };
+            $('newEmpty').onclick = () => { window.location.href = 'createproject.html'; };
+            $('close').onclick = closeForm; $('cancel').onclick = closeForm; $('form').addEventListener('submit', save); $('search').oninput = render; $('filter').onchange = render;
             $('calcArea').onclick = () => {const w = num($('width').value), l = num($('length').value); if (!w || !l) {message($('formMessage'), 'Informe largura e comprimento maiores que zero.'); return;} $('area').value = ((w / 1000) * (l / 1000)).toFixed(2); hide($('formMessage'));};
             $('list').addEventListener('click', e => {
                 const editButton = e.target.closest('[data-edit]');
                 const statusButton = e.target.closest('[data-status-toggle]');
                 const deleteButton = e.target.closest('[data-delete]');
-                if (editButton) { const p = projects.find(x => x.id === editButton.dataset.edit); if (p) openForm(p); }
+                if (editButton) { window.location.href = `createproject.html?id=${encodeURIComponent(editButton.dataset.edit)}`; return; }
                 if (statusButton) { const p = projects.find(x => x.id === statusButton.dataset.statusToggle); if (p) openStatusModal(p); }
                 if (deleteButton) { const p = projects.find(x => x.id === deleteButton.dataset.delete); if (p) openDeleteModal(p); }
             });
