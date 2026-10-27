@@ -192,9 +192,12 @@
                         </div>
                     </div>
                     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        <div><label class="label" for="clientId">Cliente</label><select id="clientId">
+                        <div class="hidden"><label class="label" for="clientId">Cliente vinculado</label><select id="clientId">
                                 <option value="">Sem cliente vinculado</option>
                             </select></div>
+                        <div><label class="label" for="clientDocument">CPF ou RG do cliente *</label><input id="clientDocument"
+                                autocomplete="off" required placeholder="Digite CPF ou RG para localizar"></div>
+                        <div class="flex items-end"><p id="clientLookupMessage" class="pb-3 text-xs text-gray-400" role="status" aria-live="polite">Informe o CPF ou RG para buscar o cadastro desta loja.</p></div>
                         <div><label class="label" for="title">Nome do projeto *</label><input id="title" required
                                 maxlength="150" placeholder="Ex.: Cozinha planejada"></div>
                         <div><label class="label" for="service">Serviço</label><input id="service"
@@ -221,6 +224,28 @@
                                 <option value="CANCELLED">Cancelado</option>
                             </select></div>
                         <div><label class="label" for="deadline">Prazo estimado</label><input id="deadline" type="date">
+                        </div>
+                    </div>
+                    <div class="mt-5 rounded-xl border border-[#292929] bg-[#0c0c0c] p-4">
+                        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <h4 class="font-semibold">Dados do cliente</h4>
+                                <p class="mt-1 text-xs text-gray-500">Se o cliente já existir nesta loja, os dados serão preenchidos automaticamente. Você pode corrigir as informações.</p>
+                            </div>
+                            <span id="clientRecordState" class="rounded-full border border-[#292929] px-3 py-1 text-xs text-gray-400">Aguardando identificação</span>
+                        </div>
+                        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                            <div><label class="label" for="clientName">Nome completo *</label><input id="clientName" required maxlength="150" autocomplete="name" placeholder="Nome do cliente"></div>
+                            <div><label class="label" for="clientPhone">Telefone</label><input id="clientPhone" type="tel" autocomplete="tel" placeholder="(00) 00000-0000"></div>
+                            <div><label class="label" for="clientWhatsapp">WhatsApp</label><input id="clientWhatsapp" type="tel" placeholder="(00) 00000-0000"></div>
+                            <div><label class="label" for="clientEmail">E-mail</label><input id="clientEmail" type="email" autocomplete="email" placeholder="cliente@email.com"></div>
+                            <div><label class="label" for="clientZipCode">CEP</label><input id="clientZipCode" autocomplete="postal-code" placeholder="00000-000"></div>
+                            <div><label class="label" for="clientStreet">Rua / avenida</label><input id="clientStreet" autocomplete="address-line1" placeholder="Logradouro"></div>
+                            <div><label class="label" for="clientNumber">Número</label><input id="clientNumber" placeholder="Nº"></div>
+                            <div><label class="label" for="clientComplement">Complemento</label><input id="clientComplement" placeholder="Apto, bloco, referência..."></div>
+                            <div><label class="label" for="clientNeighborhood">Bairro</label><input id="clientNeighborhood" autocomplete="address-level3" placeholder="Bairro"></div>
+                            <div><label class="label" for="clientCity">Cidade</label><input id="clientCity" autocomplete="address-level2" placeholder="Cidade"></div>
+                            <div><label class="label" for="clientState">Estado (UF)</label><input id="clientState" maxlength="2" autocomplete="address-level1" placeholder="SP"></div>
                         </div>
                     </div>
                 </section>
