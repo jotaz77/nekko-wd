@@ -151,7 +151,7 @@ lucide.createIcons();
                 busy = true; $('save').disabled = true; $('save').textContent = 'Salvando...';
                 const payload = {company_id: ctx.company_id, store_id: ctx.store_id || null, client_id: $('clientId').value || null, title: $('title').value.trim(), service_name: $('service').value.trim() || null, environment_type: $('environment').value || null, status: $('status').value, width_mm: num($('width').value) == null ? null : num($('width').value) * 10, length_mm: num($('length').value) == null ? null : num($('length').value) * 10, height_mm: num($('height').value) == null ? null : num($('height').value) * 10, area_m2: num($('area').value), material_type: $('material').value || null, material_color: $('color').value.trim() || null, material_thickness_mm: num($('thickness').value) == null ? null : num($('thickness').value) * 10, estimated_value: num($('estimated').value) ?? 0, final_value: num($('final').value), deadline: $('deadline').value || null, description: $('description').value.trim() || null, notes: $('notes').value.trim() || null, sketch_data: {version: 1, strokes: JSON.parse(JSON.stringify(strokes))}};
                 if (!editId) payload.created_by = user.id;
-                try { payload.client_id = await saveEditedClient(); let r = editId ? await window.supabaseClient.from('woodworking_projects').update(payload).eq('id', editId).eq('company_id', ctx.company_id).select('id').maybeSingle() : await window.supabaseClient.from('woodworking_projects').insert(payload).select('id').single(); if (r.error) throw r.error; if (!r.data) throw new Error('Nenhum registro foi atualizado. Verifique as permissões do Supabase.'); $('sketchState').textContent = strokes.length ? 'Desenho salvo no projeto' : 'Projeto salvo sem desenho'; message($('formMessage'), editId ? 'Projeto atualizado!' : 'Projeto cadastrado! ', true); await loadProjects(); setTimeout(() => {$('formSection').classList.add('hidden'); editId = null; hide($('formMessage'));}, 650);} catch (err) {console.error(err); message($('formMessage'), err?.message || 'Não foi possível salvar. Verifique a conexão e as políticas RLS.');} finally {busy = false; $('save').disabled = false; $('save').textContent = editId ? 'Salvar alterações' : 'Salvar projeto';}
+                try { payload.client_id = await saveEditedClient(); let r = editId ? await window.supabaseClient.from('woodworking_projects').update(payload).eq('id', editId).eq('company_id', ctx.company_id).select('id').maybeSingle() : await window.supabaseClient.from('woodworking_projects').insert(payload).select('id').single(); if (r.error) throw r.error; if (!r.data) throw new Error('Nenhum registro foi atualizado. Verifique as permissões do Supabase.'); $('sketchState').textContent = strokes.length ? 'Desenho salvo no projeto' : 'Projeto salvo sem desenho'; message($('formMessage'), editId ? 'Projeto atualizado! Voltando para serviços...' : 'Projeto cadastrado! Voltando para serviços...', true); setTimeout(() => { window.location.href = 'projects.html'; }, 700);} catch (err) {console.error(err); message($('formMessage'), err?.message || 'Não foi possível salvar. Verifique a conexão e as políticas RLS.');} finally {busy = false; $('save').disabled = false; $('save').textContent = editId ? 'Salvar alterações' : 'Salvar projeto';}
             }
             let selectedStatusProjectId = null;
             let selectedDeleteProjectId = null;
@@ -207,63 +207,72 @@ lucide.createIcons();
                     button.disabled = false; button.textContent = 'Sim, excluir';
                 }
             }
+            async function loadProjectForEdit(projectId) {
+                const { data, error } = await window.supabaseClient.from('woodworking_projects')
+                    .select('id,project_number,client_id,title,service_name,environment_type,status,width_mm,length_mm,height_mm,area_m2,material_type,material_color,material_thickness_mm,estimated_value,final_value,deadline,description,notes,sketch_data')
+                    .eq('id', projectId).eq('company_id', ctx.company_id).maybeSingle();
+                if (error) throw error;
+                if (!data) throw new Error('Projeto não encontrado ou você não tem permissão para editá-lo.');
+                openForm(data);
+                $('formTitle').textContent = 'Editar serviço';
+                $('save').textContent = 'Salvar alterações';
+                document.title = 'Editar serviço | NEKKO WD';
+                return data;
+            }
             async function init() {
                 try {
                     const { data, error } = await window.supabaseClient.auth.getSession();
                     if (error) throw error;
-
                     if (!data.session) {
                         window.location.href = '../login/login.html';
                         return;
                     }
-
                     user = data.session.user;
                     const result = await window.NekkoBootstrap.init();
-
                     if (!result || result.status !== 'ready') {
-                        if (result?.status === 'unauthenticated') {
-                            window.location.href = '../login/login.html';
-                        } else if (result?.status === 'no_store') {
-                            window.location.href = '../onboarding/stores.html';
-                        } else {
-                            window.location.href = '../onboarding/company.html';
-                        }
+                        if (result?.status === 'unauthenticated') window.location.href = '../login/login.html';
+                        else if (result?.status === 'no_store') window.location.href = '../onboarding/stores.html';
+                        else window.location.href = '../onboarding/company.html';
                         return;
                     }
-
-                    // bootstrap.js retorna company_id e active_store_id diretamente,
-                    // não dentro de result.context.
-                    ctx = {
-                        ...result,
-                        store_id: result.active_store_id || null
-                    };
-
-                    if (!ctx.company_id) {
-                        throw new Error('Empresa ativa não identificada.');
+                    ctx = { ...result, store_id: result.active_store_id || null };
+                    if (!ctx.company_id) throw new Error('Empresa ativa não identificada.');
+                    await loadClients();
+                    const projectId = new URLSearchParams(window.location.search).get('id');
+                    if (projectId) {
+                        editId = projectId;
+                        await loadProjectForEdit(projectId);
+                    } else {
+                        $('formTitle').textContent = 'Novo serviço';
+                        $('save').textContent = 'Salvar serviço';
+                        sketchLoad(null);
                     }
-
-                    await Promise.all([loadClients(), loadProjects()]);
                 } catch (e) {
                     console.error(e);
-                    message($('pageMessage'), e.message || 'Erro ao carregar projetos.');
+                    message($('formMessage'), e.message || 'Erro ao carregar o formulário.');
                 }
             }
-            $('newTop').onclick = () => openForm(); $('newEmpty').onclick = () => openForm(); $('close').onclick = closeForm; $('cancel').onclick = closeForm; $('form').addEventListener('submit', save); $('search').oninput = render; $('filter').onchange = render;
-            $('calcArea').onclick = () => {const w = num($('width').value), l = num($('length').value); if (!w || !l) {message($('formMessage'), 'Informe largura e comprimento maiores que zero.'); return;} $('area').value = ((w / 100) * (l / 100)).toFixed(2); hide($('formMessage'));};
-            $('clientDocument')?.addEventListener('blur', () => { if (!$('editClientMessage')) return; const digits = normalizeDocument($('clientDocument').value); const found = clients.find(c => c.store_id === ctx?.store_id && normalizeDocument(c.document) === digits); if (found) { $('clientId').value = found.id; setClientFields(found); $('editClientMessage').textContent = 'Cliente localizado nesta loja. Confira os dados antes de salvar.'; } else if (digits.length >= 7) $('editClientMessage').textContent = 'Nenhum cliente com este documento foi encontrado nesta loja; será criado ao salvar.'; });
-            $('list').addEventListener('click', e => {
-                const editButton = e.target.closest('[data-edit]');
-                const statusButton = e.target.closest('[data-status-toggle]');
-                const deleteButton = e.target.closest('[data-delete]');
-                if (editButton) { const p = projects.find(x => x.id === editButton.dataset.edit); if (p) openForm(p); }
-                if (statusButton) { const p = projects.find(x => x.id === statusButton.dataset.statusToggle); if (p) openStatusModal(p); }
-                if (deleteButton) { const p = projects.find(x => x.id === deleteButton.dataset.delete); if (p) openDeleteModal(p); }
+            $('close').onclick = () => { window.location.href = 'projects.html'; };
+            $('cancel').onclick = () => { window.location.href = 'projects.html'; };
+            $('form').addEventListener('submit', save);
+            $('calcArea').onclick = () => {
+                const w = num($('width').value), l = num($('length').value);
+                if (!w || !l) { message($('formMessage'), 'Informe largura e comprimento maiores que zero.'); return; }
+                $('area').value = ((w / 100) * (l / 100)).toFixed(2);
+                hide($('formMessage'));
+            };
+            $('clientDocument')?.addEventListener('blur', () => {
+                const digits = normalizeDocument($('clientDocument').value);
+                if (digits.length < 7) return;
+                const found = clients.find(c => c.store_id === ctx?.store_id && normalizeDocument(c.document) === digits);
+                if (found) {
+                    $('clientId').value = found.id;
+                    setClientFields(found);
+                    if ($('clientLookupMessage')) $('clientLookupMessage').textContent = 'Cliente localizado nesta loja. Confira os dados antes de salvar.';
+                } else if ($('clientLookupMessage')) {
+                    $('clientLookupMessage').textContent = 'Nenhum cliente encontrado nesta loja; ele será cadastrado ao salvar.';
+                }
             });
-            $('saveStatusButton').addEventListener('click', saveStatus);
-            $('confirmDeleteButton').addEventListener('click', deleteProject);
-            document.querySelectorAll('[data-close-modal]').forEach(button => button.addEventListener('click', () => closeModal(button.dataset.closeModal)));
-            ['statusModal', 'deleteModal'].forEach(id => $(id).addEventListener('click', e => { if (e.target === $(id)) closeModal(id); }));
-            document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal('statusModal'); closeModal('deleteModal'); } });
             initCanvasFix(); init();
             function initCanvasFix() {initCanvas(); const c = $('sketchCanvas'); c.addEventListener('pointerdown', () => {tool = document.querySelector('[data-tool].active')?.dataset.tool || 'pen'; if (activeStroke) activeStroke.tool = tool;});}
         })();
