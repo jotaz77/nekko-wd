@@ -4,90 +4,92 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#090909">
-  <title>Imprimir projeto | NEKKO WD</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <title>Nota do projeto | NEKKO WD</title>
   <link rel="stylesheet" href="print.css">
 </head>
 <body class="paper-58">
-  <header class="no-print sticky top-0 z-20 items-center justify-between gap-3 border-b border-[#292929] bg-[#090909]/95 px-4 py-3 backdrop-blur">
-    <div class="flex items-center gap-3">
-      <a id="backButton" href="projects.html" class="grid h-10 w-10 place-items-center rounded-xl border border-[#292929] text-[#F28A3D]" aria-label="Voltar"><i data-lucide="arrow-left"></i></a>
-      <div><p class="text-xs font-bold tracking-widest text-[#F28A3D]">NEKKO WD</p><h1 class="text-lg font-bold">Imprimir projeto</h1></div>
-    </div>
-    <div class="flex flex-wrap items-center gap-2">
-      <label for="paperWidth" class="text-xs text-gray-400">Papel</label>
-      <select id="paperWidth" class="rounded-lg border border-[#292929] bg-[#111] px-2 py-2 text-sm text-white">
-        <option value="58">Térmica 58 mm</option>
-        <option value="80">Térmica 80 mm</option>
-      </select>
-      <button id="printButton" type="button" class="inline-flex items-center gap-2 rounded-xl bg-[#D96E1C] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#b95b16]"><i data-lucide="printer" class="h-4 w-4"></i>Imprimir</button>
-    </div>
-  </header>
-
-  <main class="print-shell mx-auto max-w-[1000px] space-y-4 px-4 py-5 sm:py-7">
-    <div id="pageMessage" class="hidden rounded-xl border border-red-900 bg-red-950/40 p-4 text-sm text-red-300" role="status" aria-live="polite"></div>
-    <div id="printContent" class="hidden space-y-4">
-      <section class="panel p-5 print-section">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div class="flex items-start gap-3">
-            <div class="grid h-12 w-12 place-items-center rounded-xl border border-[#F28A3D]/40 bg-[#2c1a10] text-[#F28A3D]"><i data-lucide="layers-3" class="h-6 w-6"></i></div>
-            <div><p class="label">NEKKO WD · ORDEM DE PROJETO</p><h1 id="projectTitle" class="mt-1 text-2xl font-extrabold">Projeto</h1><p id="projectSubtitle" class="mt-1 text-xs muted"></p></div>
-          </div>
-          <div class="text-right"><p class="label">Número do projeto</p><p id="projectNumber" class="mt-1 text-lg font-extrabold orange">—</p><p class="mt-2 label">Status</p><p id="projectStatus" class="mt-1 text-sm font-bold">—</p></div>
+  <nav class="toolbar no-print">
+    <a id="backButton" class="back" href="projects.html" aria-label="Voltar">←</a>
+    <div class="toolbar-title"><strong>NEKKO WD</strong><span>Nota do projeto</span></div>
+    <label class="paper-picker">Papel
+      <select id="paperWidth"><option value="58">58 mm</option><option value="80">80 mm</option></select>
+    </label>
+    <button id="printButton" type="button">Imprimir nota</button>
+  </nav>
+  <main class="preview-wrap">
+    <p id="pageMessage" class="error hidden" role="status" aria-live="polite"></p>
+    <article id="receipt" class="receipt hidden">
+      <header class="receipt-header">
+        <p class="brand-kicker">DADOS DA EMPRESA</p>
+        <h1 id="companyName">Empresa</h1>
+        <p id="companyDocument" class="company-line"></p>
+        <p id="companyPhone" class="company-line"></p>
+        <p id="companyEmail" class="company-line"></p>
+        <p id="companyAddress" class="company-line"></p>
+        <div class="store-block">
+          <p class="brand-kicker">LOJA / UNIDADE</p>
+          <h2 id="storeName">Loja</h2>
+          <p id="storeAddress" class="company-line"></p>
+          <p id="storePhone" class="company-line"></p>
         </div>
-        <div class="mt-4 grid gap-3 sm:grid-cols-3">
-          <div class="summary-card rounded-lg border border-[#292929] bg-[#0c0c0c] p-3"><p class="label">Total de serviços</p><p id="servicesTotal" class="mt-1 text-lg font-extrabold">R$ 0,00</p></div>
-          <div class="summary-card rounded-lg border border-[#292929] bg-[#0c0c0c] p-3"><p class="label">Gasto com materiais</p><p id="materialsTotal" class="mt-1 text-lg font-extrabold">R$ 0,00</p></div>
-          <div class="summary-card net rounded-lg border border-[#F28A3D]/40 bg-[#F28A3D]/5 p-3"><p class="label">Valor líquido de faturamento</p><p id="netTotal" class="mt-1 text-lg font-extrabold orange">R$ 0,00</p></div>
-        </div>
+      </header>
+
+      <div class="rule"></div>
+      <section class="receipt-section">
+        <h3>NOTA DO PROJETO</h3>
+        <div class="row"><span>Nº do projeto</span><strong id="projectNumber">—</strong></div>
+        <div class="row"><span>Data</span><span id="createdAt">—</span></div>
+        <div class="row"><span>Status</span><strong id="projectStatus">—</strong></div>
+        <p id="projectTitle" class="project-title">Projeto</p>
+        <p id="projectSubtitle" class="small-line"></p>
       </section>
 
-      <section class="panel p-5 print-section">
-        <h2 class="section-title">Dados do cliente</h2>
-        <div class="data-grid">
-          <div class="field"><p class="label">Nome completo</p><p id="clientName" class="value mt-1">—</p></div>
-          <div class="field"><p class="label">CPF</p><p id="clientDocument" class="value mt-1">—</p></div>
-          <div class="field"><p class="label">Telefone</p><p id="clientPhone" class="value mt-1">—</p></div>
-          <div class="field"><p class="label">CEP</p><p id="clientZip" class="value mt-1">—</p></div>
-          <div class="field"><p class="label">Rua / avenida</p><p id="clientStreet" class="value mt-1">—</p></div>
-          <div class="field"><p class="label">Número</p><p id="clientNumber" class="value mt-1">—</p></div>
-          <div class="field"><p class="label">Complemento</p><p id="clientComplement" class="value mt-1">—</p></div>
-          <div class="field"><p class="label">Bairro</p><p id="clientNeighborhood" class="value mt-1">—</p></div>
-          <div class="field"><p class="label">Cidade / UF</p><p id="clientCityState" class="value mt-1">—</p></div>
-        </div>
+      <div class="rule"></div>
+      <section class="receipt-section">
+        <h3>CLIENTE</h3>
+        <p id="clientName" class="strong-line">—</p>
+        <p id="clientDocument" class="small-line"></p>
+        <p id="clientPhone" class="small-line"></p>
+        <p id="clientAddress" class="small-line"></p>
       </section>
 
-      <section class="panel p-5 print-section">
-        <h2 class="section-title">Serviços do projeto</h2>
-        <div id="itemsList" class="space-y-3"></div>
-        <p id="itemsFallback" class="hidden text-xs muted">Os serviços individuais ainda não foram registrados para este projeto.</p>
+      <div class="rule"></div>
+      <section class="receipt-section">
+        <h3>SERVIÇOS</h3>
+        <div id="itemsList"></div>
+        <p id="itemsFallback" class="small-line hidden">Nenhum serviço individual cadastrado.</p>
       </section>
 
-      <section class="panel p-5 print-section">
-        <h2 class="section-title">Informações do projeto</h2>
-        <div class="data-grid">
-          <div class="field"><p class="label">Ambiente</p><p id="environment" class="value mt-1">—</p></div>
-          <div class="field"><p class="label">Prazo estimado</p><p id="deadline" class="value mt-1">—</p></div>
-          <div class="field"><p class="label">Criado em</p><p id="createdAt" class="value mt-1">—</p></div>
-        </div>
-        <div class="mt-4 border-t border-[#292929] pt-3"><p class="label">Descrição do projeto</p><p id="description" class="value mt-1">—</p></div>
-        <div class="mt-4 border-t border-[#292929] pt-3"><p class="label">Observações internas</p><p id="notes" class="value mt-1">—</p></div>
+      <div class="rule"></div>
+      <section class="receipt-section totals">
+        <div class="row"><span>Total dos serviços</span><strong id="servicesTotal">R$ 0,00</strong></div>
+        <div class="row"><span>Custo dos materiais</span><strong id="materialsTotal">R$ 0,00</strong></div>
+        <div class="row net"><span>VALOR LÍQUIDO</span><strong id="netTotal">R$ 0,00</strong></div>
       </section>
 
-      <section class="panel p-5 print-section">
-        <h2 class="section-title">Desenho do projeto</h2>
-        <div class="sketch-wrap"><canvas id="sketchPreview" aria-label="Desenho salvo do projeto"></canvas></div>
-        <p id="sketchCaption" class="mt-2 text-xs muted">Nenhum desenho salvo neste projeto.</p>
+      <div id="projectInfoSection">
+        <div class="rule"></div>
+        <section class="receipt-section">
+          <h3>INFORMAÇÕES</h3>
+          <div class="row"><span>Ambiente</span><span id="environment">—</span></div>
+          <div class="row"><span>Prazo estimado</span><span id="deadline">—</span></div>
+          <p id="descriptionBlock" class="text-block"><strong>Descrição:</strong> <span id="description">—</span></p>
+          <p id="notesBlock" class="text-block"><strong>Observações:</strong> <span id="notes">—</span></p>
+        </section>
+      </div>
+
+      <div class="rule"></div>
+      <section class="signatures">
+        <div class="signature-line">Assinatura do cliente</div>
+        <div class="signature-line">Responsável pela marcenaria</div>
       </section>
-      <section class="grid grid-cols-2 gap-8 px-3 pb-3 pt-8 text-center">
-        <div class="border-t border-gray-400 pt-2"><p class="text-xs">Assinatura do cliente</p></div>
-        <div class="border-t border-gray-400 pt-2"><p class="text-xs">Responsável pelo projeto</p></div>
-      </section>
-    </div>
-    <footer class="border-t border-[#292929] pt-3 text-center text-[10px] text-gray-600">NEKKO WD · Gestão para marcenarias</footer>
+      <footer>
+        <p>Documento de controle do projeto</p>
+        <p id="printedAt"></p>
+        <strong>NEKKO WD</strong>
+      </footer>
+    </article>
   </main>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../../assets/js/config.js"></script>
   <script src="../../assets/js/supabase.js"></script>
@@ -96,6 +98,5 @@
   <script src="../../assets/js/storage.js"></script>
   <script src="../../assets/js/bootstrap.js"></script>
   <script src="print.js"></script>
-  <script>if(window.lucide) lucide.createIcons();</script>
 </body>
 </html>
