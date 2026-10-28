@@ -56,7 +56,7 @@
   async function loadPrint(id) {
     const supabase = window.supabaseClient;
     const { data: project, error: projectError } = await scopeProject(supabase.from('woodworking_projects')
-      .select('id, project_number, client_id, title, service_name, environment_type, status, width_mm, length_mm, height_mm, material_type, material_color, material_thickness_mm, estimated_value, final_value, materials_cost, deadline, description, notes, created_at'))
+      .select('id, project_number, client_id, title, service_name, environment_type, status, width_mm, length_mm, height_mm, material_type, material_color, material_thickness_mm, estimated_value, final_value, deadline, description, notes, created_at'))
       .eq('id', id).eq('company_id', context.company_id).maybeSingle();
     if (projectError) throw projectError;
     if (!project) throw new Error('Projeto não encontrado nesta loja ou você não tem permissão para imprimi-lo.');
@@ -91,12 +91,11 @@
       .select('id, sort_order, name, width_cm, length_cm, height_cm, material_type, material_color, thickness_cm, service_value')
       .eq('project_id', project.id).eq('company_id', context.company_id).order('sort_order', {ascending:true});
     if (itemsError) throw itemsError;
-    if (!items?.length) items = [{name:project.service_name || project.title, width_mm:project.width_mm, length_mm:project.length_mm, height_mm:project.height_mm, material_type:project.material_type, material_color:project.material_color, material_thickness_mm:project.material_thickness_mm, service_value:project.final_value ?? project.estimated_value ?? 0}];
+    if (!items?.length) items = [{name:project.service_name || project.title, width_mm:project.width_mm, length_mm:project.length_mm, height_mm:project.height_mm, material_type:project.material_type, material_color:project.material_color, material_thickness_mm:project.material_thickness_mm, service_value:project.estimated_value ?? project.final_value ?? 0}];
+    // A nota é destinada ao cliente: o total deve ser exatamente a soma dos valores cadastrados nos serviços.
+    // Custo de materiais e lucro líquido são dados internos e nunca entram no valor impresso.
     const servicesTotal = items.reduce((sum, item) => sum + (Number(item.service_value) || 0), 0);
-    const materialsTotal = Number(project.materials_cost || 0);
-    setText('servicesTotal', money.format(servicesTotal));
-    setText('materialsTotal', money.format(materialsTotal));
-    setText('netTotal', money.format(servicesTotal - materialsTotal));
+    setText('netTotal', money.format(servicesTotal));
     renderItems(items, project);
 
     if (project.client_id) {
