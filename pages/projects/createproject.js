@@ -254,19 +254,11 @@
         setClientRecordState('Cliente encontrado nesta loja');
         setCepMessage('Cadastro localizado. Confira ou atualize os dados antes de salvar.');
       } else {
+        // Igual ao fluxo do NEKKO OS: uma busca sem resultado não apaga
+        // os campos preenchidos manualmente. O usuário pode cadastrar
+        // um cliente novo com esse documento na mesma tela.
         clientRecordId = null;
         setClientField('clientId', '');
-        setClientField('clientName', '');
-        setClientField('clientPhone', '');
-        setClientField('clientWhatsapp', '');
-        setClientField('clientEmail', '');
-        setClientField('clientZipCode', '');
-        setClientField('clientStreet', '');
-        setClientField('clientNumber', '');
-        setClientField('clientComplement', '');
-        setClientField('clientNeighborhood', '');
-        setClientField('clientCity', '');
-        setClientField('clientState', '');
         setClientRecordState('Novo cliente nesta loja');
         setCepMessage('Nenhum cadastro encontrado nesta loja. Preencha os dados para cadastrar o cliente.');
       }
@@ -937,7 +929,10 @@
     });
     $('clientDocument')?.addEventListener('input', () => {
       const currentDigits = normalizeDocument($('clientDocument').value);
-      if (clientLookupDocument && currentDigits !== clientLookupDocument) {
+      // Só limpamos dados automaticamente quando estavam vinculados a um
+      // cliente encontrado. Para um documento novo, preservamos o que a pessoa
+      // já digitou enquanto corrige/completa o CPF ou RG.
+      if (clientRecordId && clientLookupDocument && currentDigits !== clientLookupDocument) {
         clientRecordId = null;
         $('clientId').value = '';
         for (const id of [
