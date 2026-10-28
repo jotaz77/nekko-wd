@@ -189,7 +189,7 @@
                     <h2 id="formTitle" class="mt-1 text-lg font-bold">Novo projeto</h2>
                 </div><button id="close" type="button" aria-label="Fechar"><i data-lucide="x"></i></button>
             </div>
-            <form id="form" class="space-y-6 p-5"><input type="hidden" id="projectId">
+            <form id="form" class="mx-auto w-full max-w-5xl space-y-6 p-5"><input type="hidden" id="projectId">
                 <section>
                     <div class="mb-4 flex items-center gap-3"><span class="section-icon"><i
                                 data-lucide="user-round"></i></span>
@@ -257,40 +257,24 @@
                     </div>
                 </section>
                 <section class="border-t border-[#292929] pt-6">
-                    <div class="mb-4 flex items-center gap-3"><span class="section-icon"><i
-                                data-lucide="ruler"></i></span>
-                        <h3 class="font-bold">Medidas (cm)</h3>
+                    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-3"><span class="section-icon"><i data-lucide="layers-3"></i></span>
+                            <div><h3 class="font-bold">Serviços</h3><p class="text-xs text-gray-500">Adicione cada peça ou serviço que faz parte deste projeto.</p></div>
+                        </div>
+                        <button id="addProjectItem" type="button" class="primary rounded-xl px-4 py-2.5 text-sm font-bold">+ Adicionar serviço</button>
                     </div>
-                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                        <div><label class="label" for="width">Largura (cm)</label><input id="width" type="number" min="0"
-                                step=".01"></div>
-                        <div><label class="label" for="length">Comprimento (cm)</label><input id="length" type="number"
-                                min="0" step=".01"></div>
-                        <div><label class="label" for="height">Altura (cm)</label><input id="height" type="number" min="0"
-                                step=".01"></div>
-                        <div><label class="label" for="area">Área (m²)</label><input id="area" type="number" min="0"
-                                step=".01" readonly><button id="calcArea" type="button"
-                                class="mt-2 text-xs text-[#F28A3D]">Calcular largura × comprimento</button></div>
-                    </div>
+                    <div id="projectItems" class="space-y-4"></div>
+                    <p id="itemsEmptyState" class="rounded-xl border border-dashed border-[#333] p-5 text-center text-sm text-gray-500">Nenhum serviço adicionado. Clique em “Adicionar serviço” para começar.</p>
                 </section>
                 <section class="border-t border-[#292929] pt-6">
-                    <div class="mb-4 flex items-center gap-3"><span class="section-icon"><i
-                                data-lucide="panels-top-left"></i></span>
-                        <h3 class="font-bold">Materiais</h3>
+                    <div class="mb-4 flex items-center gap-3"><span class="section-icon"><i data-lucide="package"></i></span>
+                        <div><h3 class="font-bold">Custo dos materiais</h3><p class="text-xs text-gray-500">Informe o gasto total com materiais deste projeto.</p></div>
                     </div>
-                    <div class="grid gap-4 md:grid-cols-3">
-                        <div><label class="label" for="material">Tipo de material</label><select id="material">
-                                <option value="">Selecione</option>
-                                <option>MDF</option>
-                                <option>MDP</option>
-                                <option>Madeira maciça</option>
-                                <option>Compensado</option>
-                                <option>Outro</option>
-                            </select></div>
-                        <div><label class="label" for="color">Cor / acabamento</label><input id="color"
-                                placeholder="Ex.: Carvalho, branco TX"></div>
-                        <div><label class="label" for="thickness">Espessura (cm)</label><input id="thickness"
-                                type="number" min="0" step=".1"></div>
+                    <div class="max-w-sm"><label class="label" for="materialsCost">Gasto total com materiais (R$)</label><input id="materialsCost" type="number" min="0" step="0.01" value="0" placeholder="0,00"></div>
+                    <div class="mt-5 grid gap-3 sm:grid-cols-3">
+                        <div class="rounded-xl border border-[#292929] bg-[#0c0c0c] p-4"><p class="text-xs text-gray-500">Total de serviços</p><p id="servicesTotal" class="mt-2 text-xl font-bold">R$ 0,00</p></div>
+                        <div class="rounded-xl border border-[#292929] bg-[#0c0c0c] p-4"><p class="text-xs text-gray-500">Gasto com materiais</p><p id="materialsTotal" class="mt-2 text-xl font-bold">R$ 0,00</p></div>
+                        <div class="rounded-xl border border-[#F28A3D]/40 bg-[#F28A3D]/5 p-4"><p class="text-xs text-gray-400">Valor líquido de faturamento</p><p id="netRevenue" class="mt-2 text-xl font-bold text-[#F28A3D]">R$ 0,00</p></div>
                     </div>
                 </section>
                 <section class="border-t border-[#292929] pt-6">
@@ -325,22 +309,15 @@
                 </section>
                 <section class="border-t border-[#292929] pt-6">
                     <div class="grid gap-4 md:grid-cols-2">
-                        <div><label class="label" for="estimated">Valor estimado (R$)</label><input id="estimated"
-                                type="number" min="0" step=".01" value="0"></div>
-                        <div><label class="label" for="final">Valor final (R$)</label><input id="final" type="number"
-                                min="0" step=".01" placeholder="Opcional"></div>
-                        <div class="md:col-span-2"><label class="label" for="description">Descrição do
-                                projeto</label><textarea id="description" rows="3" maxlength="5000"
-                                placeholder="O que será produzido, ferragens e acabamentos..."></textarea></div>
-                        <div class="md:col-span-2"><label class="label" for="notes">Observações
-                                internas</label><textarea id="notes" rows="2" maxlength="5000"></textarea></div>
+                        <div class="md:col-span-2"><label class="label" for="description">Descrição do projeto</label><textarea id="description" rows="3" maxlength="5000" placeholder="O que será produzido, ferragens e acabamentos..."></textarea></div>
+                        <div class="md:col-span-2"><label class="label" for="notes">Observações internas</label><textarea id="notes" rows="2" maxlength="5000"></textarea></div>
                     </div>
                 </section>
                 <div id="formMessage" class="hidden rounded-xl border p-3 text-sm" role="status"></div>
                 <div class="flex flex-col-reverse gap-3 border-t border-[#292929] pt-5 sm:flex-row sm:justify-end">
                     <button id="cancel" type="button"
                         class="rounded-xl border border-[#292929] px-5 py-3 text-sm">Cancelar</button><button id="save"
-                        type="submit" class="primary rounded-xl px-6 py-3 text-sm font-bold">Salvar projeto</button>
+                        type="submit" class="primary rounded-xl px-6 py-3 text-sm font-bold">Salvar Projeto!</button>
                 </div>
             </form>
         </section>
