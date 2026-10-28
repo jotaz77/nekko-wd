@@ -202,9 +202,6 @@
                         <div class="hidden"><label class="label" for="clientId">Cliente vinculado</label><select id="clientId">
                                 <option value="">Sem cliente vinculado</option>
                             </select></div>
-                        <div><label class="label" for="clientDocument">CPF ou RG do cliente *</label><input id="clientDocument"
-                                autocomplete="off" required placeholder="Digite CPF ou RG para localizar"></div>
-                        <div class="flex items-end"><p id="clientLookupMessage" class="pb-3 text-xs text-gray-400" role="status" aria-live="polite">Informe o CPF ou RG para buscar o cadastro desta loja.</p></div>
                         <div><label class="label" for="title">Nome do projeto *</label><input id="title" required
                                 maxlength="150" placeholder="Ex.: Cozinha planejada"></div>
                         <div><label class="label" for="service">Serviço</label><input id="service"
@@ -242,6 +239,8 @@
                             <span id="clientRecordState" class="rounded-full border border-[#292929] px-3 py-1 text-xs text-gray-400">Aguardando identificação</span>
                         </div>
                         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                            <div><label class="label" for="clientDocument">CPF ou RG *</label><input id="clientDocument" autocomplete="off" required placeholder="Digite CPF ou RG para localizar"></div>
+                            <div class="flex items-end"><p id="clientLookupMessage" class="pb-3 text-xs text-gray-400" role="status" aria-live="polite">Informe CPF ou RG para buscar o cadastro desta loja.</p></div>
                             <div><label class="label" for="clientName">Nome completo *</label><input id="clientName" required maxlength="150" autocomplete="name" placeholder="Nome do cliente"></div>
                             <div><label class="label" for="clientPhone">Telefone</label><input id="clientPhone" type="tel" autocomplete="tel" placeholder="(00) 00000-0000"></div>
                             <div><label class="label" for="clientWhatsapp">WhatsApp</label><input id="clientWhatsapp" type="tel" placeholder="(00) 00000-0000"></div>
