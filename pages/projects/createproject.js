@@ -132,7 +132,33 @@
   }
 
   function normalizeDocument(value) {
-    return String(value || '').replace(/\D/g, '');
+    return String(value || '').replace(/\D/g, '').slice(0, 11);
+  }
+
+  function formatCpf(value) {
+    const digits = normalizeDocument(value);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
+  }
+
+  function isValidCpf(value) {
+    const cpf = normalizeDocument(value);
+    if (cpf.length !== 11 || /^([0-9])\1{10}$/.test(cpf)) return false;
+
+    const digits = cpf.split('').map(Number);
+    let sum = 0;
+    for (let i = 0; i < 9; i++) sum += digits[i] * (10 - i);
+    let check = (sum * 10) % 11;
+    if (check === 10) check = 0;
+    if (check !== digits[9]) return false;
+
+    sum = 0;
+    for (let i = 0; i < 10; i++) sum += digits[i] * (11 - i);
+    check = (sum * 10) % 11;
+    if (check === 10) check = 0;
+    return check === digits[10];
   }
 
   function setClientRecordState(message, isError = false) {
@@ -155,7 +181,7 @@
       ? client.address
       : {};
 
-    setClientField('clientDocument', client?.document || '');
+    setClientField('clientDocument', formatCpf(client?.document || ''));
     setClientField('clientName', client?.name || '');
     setClientField('clientPhone', client?.phone || '');
     setClientField('clientZipCode', address.zip_code || '');
@@ -177,10 +203,10 @@
       throw new Error('Nenhuma loja ativa foi identificada. Selecione uma loja e tente novamente.');
     }
     if (!documentDigits) {
-      throw new Error('Informe o CPF ou RG do cliente.');
+      throw new Error('Informe o CPF do cliente.');
     }
-    if (documentDigits.length < 7) {
-      throw new Error('Confira o CPF ou RG informado.');
+    if (documentDigits.length !== 11 || !isValidCpf(documentDigits)) {
+      throw new Error('Informe um CPF válido com os 11 dígitos corretos.');
     }
     if (!name) {
       throw new Error('Informe o nome completo do cliente.');
@@ -190,7 +216,7 @@
       company_id: ctx.company_id,
       store_id: ctx.active_store_id,
       name,
-      document: documentValue,
+      document: formatCpf(documentValue),
       phone: $('clientPhone')?.value.trim() || null,
       address: {
         zip_code: $('clientZipCode')?.value.trim() || null,
@@ -206,7 +232,7 @@
 
   async function findClientByDocument(documentValue) {
     const digits = normalizeDocument(documentValue);
-    if (!digits || digits.length < 7) return null;
+    if (!isValidCpf(digits)) return null;
     if (!ctx?.company_id || !ctx?.active_store_id) {
       throw new Error('Não foi possível identificar a empresa e a loja ativa.');
     }
@@ -228,10 +254,21 @@
 
     const documentValue = field.value.trim();
     const digits = normalizeDocument(documentValue);
-    if (digits.length < 7) {
+    if (digits.length < 11) {
+      setClientRecordState('Digite o CPF completo');
+      return;
+    }
+    if (!isValidCpf(digits)) {
       clientRecordId = null;
       clientLookupDocument = '';
-      setClientRecordState('Informe CPF ou RG');
+      setClientRecordState('CPF inválido', true);
+      setCepMessage('Confira os números do CPF. A busca será feita automaticamente quando o CPF for válido.', true);
+      return;
+    }
+
+    const currentState = $('clientRecordState')?.textContent?.trim() || '';
+    if (clientLookupDocument === digits &&
+        ['Cliente encontrado nesta loja', 'Novo cliente nesta loja', 'Novo cliente cadastrado', 'Cliente vinculado ao projeto'].includes(currentState)) {
       return;
     }
 
@@ -282,7 +319,7 @@
       targetId = found.id;
       clientRecordId = found.id;
       fillClientFields(found);
-      throw new Error('Esse CPF/RG já está cadastrado nesta loja. Os dados foram carregados; confira e salve novamente para atualizar o cliente.');
+      throw new Error('Esse CPF já está cadastrado nesta loja. Os dados foram carregados; confira e salve novamente para atualizar o cliente.');
     }
 
     if (targetId) {
@@ -922,12 +959,20 @@
       }
     });
     $('clientDocument')?.addEventListener('input', () => {
-      const currentDigits = normalizeDocument($('clientDocument').value);
-      // Só limpamos dados automaticamente quando estavam vinculados a um
-      // cliente encontrado. Para um documento novo, preservamos o que a pessoa
-      // já digitou enquanto corrige/completa o CPF ou RG.
+      const field = $('clientDocument');
+      const currentDigits = normalizeDocument(field.value);
+      const formatted = formatCpf(currentDigits);
+      if (field.value !== formatted) {
+        const cursorAtEnd = field.selectionStart === field.value.length;
+        field.value = formatted;
+        if (cursorAtEnd) field.setSelectionRange(formatted.length, formatted.length);
+      }
+
+      // Se o documento mudou depois de localizar um cliente, desvinculamos
+      // o registro anterior e limpamos seus dados para evitar mistura de clientes.
       if (clientRecordId && clientLookupDocument && currentDigits !== clientLookupDocument) {
         clientRecordId = null;
+        clientLookupDocument = '';
         $('clientId').value = '';
         for (const id of [
           'clientName', 'clientPhone',
@@ -936,7 +981,20 @@
         ]) {
           setClientField(id, '');
         }
-        setClientRecordState('Documento alterado — consulte novamente');
+        setClientRecordState('CPF alterado — consultando quando estiver completo');
+      }
+
+      if (currentDigits.length === 11) {
+        if (isValidCpf(currentDigits)) {
+          lookupClientByDocument();
+        } else {
+          clientLookupDocument = '';
+          setClientRecordState('CPF inválido', true);
+          setCepMessage('O CPF digitado não é válido. Confira os números.', true);
+        }
+      } else {
+        setClientRecordState('Digite o CPF completo');
+        setCepMessage('');
       }
     });
 
