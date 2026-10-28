@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090909">
+  <link rel="icon" type="image/png" href="../../assets/img/logo.png">
+  <title>Detalhes do projeto | NEKKO WD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#090909;color:#f5f5f5;font-family:Inter,system-ui,sans-serif}
+    .panel{background:#111;border:1px solid #292929;border-radius:15px}.muted{color:#9ca3af}.label{color:#9ca3af;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}.value{overflow-wrap:anywhere;font-size:14px;color:#f3f4f6}.section-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:#2c1a10;color:#f28a3d;flex-shrink:0}.primary{background:#c65a16;color:white}.primary:hover{background:#a9480e}.outline{border:1px solid #383838;color:#e5e7eb}.outline:hover{border-color:#f28a3d}.badge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:700}.QUOTE,.PENDING{background:#332713;color:#f3c969}.IN_PROGRESS{background:#172c3e;color:#79c1ff}.COMPLETED,.DELIVERED{background:#173524;color:#72d99a}.CANCELLED{background:#391d1d;color:#f28b82}.data-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.field{min-width:0}.sketch-wrap{overflow:hidden;border:1px solid #383838;border-radius:12px;background:#f8f7f3;background-image:radial-gradient(#d6d3cc 1px,transparent 1px);background-size:18px 18px}#sketchPreview{display:block;width:100%;height:360px} @media(max-width:700px){.data-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#sketchPreview{height:280px}} @media(max-width:430px){.data-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header class="sticky top-0 z-20 border-b border-[#292929] bg-[#090909]/95 backdrop-blur">
+  <div class="mx-auto flex max-w-[1200px] items-center justify-between gap-3 px-4 py-4">
+    <div class="flex items-center gap-3">
+      <a href="projects.html" class="grid h-10 w-10 place-items-center rounded-xl border border-[#292929] text-[#F28A3D]" aria-label="Voltar para serviços"><i data-lucide="arrow-left"></i></a>
+      <div><div class="text-xs font-bold tracking-widest text-[#F28A3D]">NEKKO WD</div><h1 class="text-xl font-bold">Detalhes do projeto</h1></div>
+    </div>
+    <div class="flex flex-wrap items-center justify-end gap-2">
+      <a id="editButton" href="#" class="primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold"><i data-lucide="pencil" class="h-4 w-4"></i><span>Editar projeto</span></a>
+    </div>
+  </div>
+</header>
+<main class="mx-auto max-w-[1200px] space-y-5 px-4 py-6 sm:py-8">
+  <div id="pageMessage" class="hidden rounded-xl border p-4 text-sm" role="status" aria-live="polite"></div>
+  <section id="detailsContent" class="hidden space-y-5">
+    <section class="panel p-5 sm:p-6">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0"><p class="label">Projeto <span id="projectNumber"></span></p><h2 id="projectTitle" class="mt-2 break-words text-2xl font-bold sm:text-3xl">—</h2><p id="projectSubtitle" class="mt-2 text-sm muted"></p></div>
+        <span id="projectStatus" class="badge PENDING">Pendente</span>
+      </div>
+      <div class="mt-5 grid gap-3 sm:grid-cols-3">
+        <div class="rounded-xl border border-[#292929] bg-[#0c0c0c] p-4"><p class="label">Total de serviços</p><p id="servicesTotal" class="mt-2 text-xl font-bold">R$ 0,00</p></div>
+        <div class="rounded-xl border border-[#292929] bg-[#0c0c0c] p-4"><p class="label">Gasto com materiais</p><p id="materialsTotal" class="mt-2 text-xl font-bold">R$ 0,00</p></div>
+        <div class="rounded-xl border border-[#F28A3D]/40 bg-[#F28A3D]/5 p-4"><p class="label">Valor líquido de faturamento</p><p id="netTotal" class="mt-2 text-xl font-bold text-[#F28A3D]">R$ 0,00</p></div>
+      </div>
+    </section>
+    <section class="panel p-5 sm:p-6">
+      <div class="mb-5 flex items-center gap-3"><span class="section-icon"><i data-lucide="contact-round"></i></span><div><h3 class="text-lg font-bold">Dados do cliente</h3><p class="text-xs muted">Informações de contato e endereço vinculados ao projeto.</p></div></div>
+      <div class="data-grid">
+        <div class="field"><p class="label">Nome completo</p><p id="clientName" class="value mt-1">—</p></div>
+        <div class="field"><p class="label">CPF</p><p id="clientDocument" class="value mt-1">—</p></div>
+        <div class="field"><p class="label">Telefone</p><p id="clientPhone" class="value mt-1">—</p></div>
+        <div class="field"><p class="label">CEP</p><p id="clientZip" class="value mt-1">—</p></div>
+        <div class="field"><p class="label">Rua / avenida</p><p id="clientStreet" class="value mt-1">—</p></div>
+        <div class="field"><p class="label">Número</p><p id="clientNumber" class="value mt-1">—</p></div>
+        <div class="field"><p class="label">Complemento</p><p id="clientComplement" class="value mt-1">—</p></div>
+        <div class="field"><p class="label">Bairro</p><p id="clientNeighborhood" class="value mt-1">—</p></div>
+        <div class="field"><p class="label">Cidade / UF</p><p id="clientCityState" class="value mt-1">—</p></div>
+      </div>
+    </section>
+    <section class="panel p-5 sm:p-6">
+      <div class="mb-5 flex items-center gap-3"><span class="section-icon"><i data-lucide="layers-3"></i></span><div><h3 class="text-lg font-bold">Serviços do projeto</h3><p class="text-xs muted">Peças, medidas, materiais e valores cadastrados.</p></div></div>
+      <div id="itemsList" class="space-y-4"></div>
+      <p id="itemsFallback" class="hidden text-sm muted">Os serviços individuais ainda não foram registrados para este projeto.</p>
+    </section>
+    <section class="panel p-5 sm:p-6">
+      <div class="mb-5 flex items-center gap-3"><span class="section-icon"><i data-lucide="calendar-clock"></i></span><div><h3 class="text-lg font-bold">Informações do projeto</h3><p class="text-xs muted">Ambiente, prazo e dados gerais.</p></div></div>
+      <div class="data-grid">
+        <div class="field"><p class="label">Ambiente</p><p id="environment" class="value mt-1">—</p></div>
+        <div class="field"><p class="label">Prazo estimado</p><p id="deadline" class="value mt-1">—</p></div>
+        <div class="field"><p class="label">Criado em</p><p id="createdAt" class="value mt-1">—</p></div>
+      </div>
+      <div class="mt-5 border-t border-[#292929] pt-5"><p class="label">Descrição do projeto</p><p id="description" class="mt-2 whitespace-pre-wrap break-words text-sm leading-6">—</p></div>
+      <div class="mt-5 border-t border-[#292929] pt-5"><p class="label">Observações internas</p><p id="notes" class="mt-2 whitespace-pre-wrap break-words text-sm leading-6">—</p></div>
+    </section>
+    <section class="panel p-5 sm:p-6">
+      <div class="mb-5 flex items-center gap-3"><span class="section-icon"><i data-lucide="pencil-ruler"></i></span><div><h3 class="text-lg font-bold">Desenho do projeto</h3><p class="text-xs muted">Rascunho salvo junto ao projeto.</p></div></div>
+      <div class="sketch-wrap"><canvas id="sketchPreview" aria-label="Desenho salvo do projeto"></canvas></div>
+      <p id="sketchCaption" class="mt-3 text-xs muted">Nenhum desenho salvo neste projeto.</p>
+    </section>
+    <div class="flex flex-wrap justify-between gap-3 pb-4"><a href="projects.html" class="outline inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold"><i data-lucide="arrow-left" class="h-4 w-4"></i>Voltar para serviços</a><a id="editButtonBottom" href="#" class="primary inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold"><i data-lucide="pencil" class="h-4 w-4"></i>Editar projeto</a></div>
+  </section>
+</main>
+<footer class="mx-auto max-w-[1200px] border-t border-[#292929] px-4 py-5 text-center text-xs text-gray-600">NEKKO WD · Gestão para marcenarias</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../assets/js/config.js"></script>
+<script src="../../assets/js/supabase.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/storage.js"></script>
+<script src="../../assets/js/bootstrap.js"></script>
+<script src="details.js"></script>
+<script>if(window.lucide) lucide.createIcons();</script>
+</body>
+</html>
