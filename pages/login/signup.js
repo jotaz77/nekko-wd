@@ -16,6 +16,10 @@
   const signupButton = document.getElementById('signupButton');
   const message = document.getElementById('message');
 
+  // Evita requisições duplicadas causadas por cliques ou submits repetidos.
+  let isSubmitting = false;
+  let signupCompleted = false;
+
   function showMessage(text, type = 'error') {
     message.textContent = text;
     message.className = 'mb-5 rounded-lg border p-3 text-sm';
@@ -85,6 +89,9 @@
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+
+    if (isSubmitting || signupCompleted) return;
+
     clearMessage();
 
     const fullName = fullNameInput.value.trim();
@@ -117,6 +124,7 @@
       return;
     }
 
+    isSubmitting = true;
     setLoading(true);
 
     try {
@@ -145,12 +153,18 @@
         'success'
       );
 
+      // Sem sessão, o Supabase exige confirmação por e-mail. Não permita
+      // outro envio nesta página após o cadastro ter sido aceito.
+      signupCompleted = true;
+      signupButton.disabled = true;
+      signupButton.innerHTML = '<span>Cadastro realizado</span>';
       form.reset();
     } catch (error) {
       console.error('[NEKKO WD] Erro no cadastro:', error);
       showMessage(getFriendlyError(error));
     } finally {
-      setLoading(false);
+      isSubmitting = false;
+      if (!signupCompleted) setLoading(false);
     }
   });
 
