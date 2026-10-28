@@ -196,14 +196,7 @@
     }
   });
 
-  // Se já houver sessão, encaminha o usuário para a etapa adequada.
-  window.NekkoAuth.getSession()
-    .then((session) => {
-      if (session) {
-        return redirectAfterLogin();
-      }
-    })
-    .catch((error) => {
-      console.error('[NEKKO WD] Erro ao verificar sessão:', error);
-    });
+  // Não redireciona automaticamente ao abrir a tela.
+  // Mesmo que o navegador preencha os campos ou exista uma sessão salva,
+  // o usuário só avança após clicar em "Entrar".
 })();
