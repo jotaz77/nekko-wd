@@ -158,8 +158,6 @@
     setClientField('clientDocument', client?.document || '');
     setClientField('clientName', client?.name || '');
     setClientField('clientPhone', client?.phone || '');
-    setClientField('clientWhatsapp', client?.whatsapp || '');
-    setClientField('clientEmail', client?.email || '');
     setClientField('clientZipCode', address.zip_code || '');
     setClientField('clientStreet', address.street || '');
     setClientField('clientNumber', address.number || '');
@@ -194,8 +192,6 @@
       name,
       document: documentValue,
       phone: $('clientPhone')?.value.trim() || null,
-      whatsapp: $('clientWhatsapp')?.value.trim() || null,
-      email: $('clientEmail')?.value.trim() || null,
       address: {
         zip_code: $('clientZipCode')?.value.trim() || null,
         street: $('clientStreet')?.value.trim() || null,
@@ -217,7 +213,7 @@
 
     const { data, error } = await window.supabaseClient
       .from('clients')
-      .select('id, company_id, store_id, name, document, email, phone, whatsapp, address')
+      .select('id, company_id, store_id, name, document, phone, address')
       .eq('company_id', ctx.company_id)
       .eq('store_id', ctx.active_store_id)
       .limit(500);
@@ -295,8 +291,6 @@
         .update({
           name: payload.name,
           phone: payload.phone,
-          whatsapp: payload.whatsapp,
-          email: payload.email,
           address: payload.address
         })
         .eq('id', targetId)
@@ -854,7 +848,7 @@
     if (data.client_id) {
       const { data: clientData, error: clientError } = await window.supabaseClient
         .from('clients')
-        .select('id, company_id, store_id, name, document, email, phone, whatsapp, address')
+        .select('id, company_id, store_id, name, document, phone, address')
         .eq('id', data.client_id)
         .eq('company_id', ctx.company_id)
         .eq('store_id', ctx.active_store_id)
@@ -936,7 +930,7 @@
         clientRecordId = null;
         $('clientId').value = '';
         for (const id of [
-          'clientName', 'clientPhone', 'clientWhatsapp', 'clientEmail',
+          'clientName', 'clientPhone',
           'clientZipCode', 'clientStreet', 'clientNumber', 'clientComplement',
           'clientNeighborhood', 'clientCity', 'clientState'
         ]) {
