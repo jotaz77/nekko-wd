@@ -1,0 +1,191 @@
+/* NEKKO WD — impressão térmica portátil (58 mm / 80 mm) */
+:root {
+  --paper-width: 58mm;
+  --paper-inner-width: 54mm;
+  --thermal-ink: #111111;
+  --thermal-muted: #444444;
+  --thermal-rule: #777777;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #090909;
+  color: #f5f5f5;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.print-shell {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+}
+.panel {
+  background: #111;
+  border: 1px solid #292929;
+  border-radius: 12px;
+}
+.label {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+.value {
+  margin: 3px 0 0;
+  color: #f3f4f6;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.section-title {
+  margin: 0 0 9px;
+  font-size: 14px;
+  font-weight: 800;
+}
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px 12px;
+}
+.field { min-width: 0; }
+.service {
+  padding: 10px 0;
+  border-bottom: 1px dashed #777;
+  break-inside: avoid;
+}
+.service:last-child { border-bottom: 0; }
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px 10px;
+  margin-top: 9px;
+}
+.orange { color: #f28a3d; }
+.sketch-wrap {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+#sketchPreview { display: block; width: 100%; height: 210px; }
+.no-print { display: flex; }
+.summary-card { min-width: 0; }
+.summary-card p:last-child { overflow-wrap: anywhere; }
+@media screen and (max-width: 640px) {
+  .data-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@page { size: 58mm auto; margin: 2mm; }
+@media print {
+  html, body {
+    width: var(--paper-width) !important;
+    min-width: 0 !important;
+    max-width: var(--paper-width) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: var(--thermal-ink) !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 10px !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body.paper-80 {
+    --paper-width: 80mm;
+    --paper-inner-width: 76mm;
+  }
+  body.paper-58 {
+    --paper-width: 58mm;
+    --paper-inner-width: 54mm;
+  }
+  .no-print { display: none !important; }
+  .print-shell {
+    display: block !important;
+    width: var(--paper-inner-width) !important;
+    max-width: var(--paper-inner-width) !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+  #printContent {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  #printContent > * { margin: 0 0 4mm !important; }
+  .panel {
+    width: 100% !important;
+    padding: 2.5mm !important;
+    border: 0 !important;
+    border-bottom: 1px dashed var(--thermal-rule) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    color: var(--thermal-ink) !important;
+    break-inside: avoid-page;
+  }
+  .label {
+    color: var(--thermal-muted) !important;
+    font-size: 8px !important;
+    line-height: 1.2 !important;
+  }
+  .value {
+    color: var(--thermal-ink) !important;
+    font-size: 9px !important;
+    line-height: 1.3 !important;
+  }
+  .section-title {
+    color: var(--thermal-ink) !important;
+    font-size: 11px !important;
+    margin: 0 0 2mm !important;
+    padding-bottom: 1.5mm !important;
+    border-bottom: 1px solid var(--thermal-rule) !important;
+  }
+  #projectTitle {
+    color: var(--thermal-ink) !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    overflow-wrap: anywhere;
+  }
+  #projectNumber, #projectStatus, #projectSubtitle { color: var(--thermal-ink) !important; }
+  .orange { color: var(--thermal-ink) !important; }
+  .data-grid, .service-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 2mm !important;
+  }
+  .service {
+    padding: 2mm 0 !important;
+    border-bottom: 1px dashed var(--thermal-rule) !important;
+    break-inside: avoid-page;
+  }
+  .service h3 { color: var(--thermal-ink) !important; font-size: 10px !important; }
+  .service p { color: var(--thermal-ink) !important; }
+  .service-grid { margin-top: 2mm !important; }
+  .summary-card {
+    padding: 2mm !important;
+    border: 1px solid #999 !important;
+    border-radius: 2px !important;
+    background: #fff !important;
+  }
+  .summary-card p:last-child { color: var(--thermal-ink) !important; font-size: 10px !important; }
+  .grid.gap-3.sm\:grid-cols-3 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 2mm !important;
+  }
+  #sketchPreview { width: 100% !important; height: 35mm !important; }
+  .sketch-wrap { border: 1px solid #999 !important; border-radius: 0 !important; }
+  #itemsList { display: block !important; }
+  footer {
+    color: var(--thermal-muted) !important;
+    font-size: 7px !important;
+    text-align: center !important;
+    border-top: 1px dashed var(--thermal-rule) !important;
+    padding-top: 2mm !important;
+  }
+  .print-section { break-inside: auto !important; }
+  .panel, .service, .summary-card { page-break-inside: avoid; }
+  a { color: var(--thermal-ink) !important; text-decoration: none !important; }
+}
