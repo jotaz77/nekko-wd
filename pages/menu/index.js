@@ -254,49 +254,49 @@
     const companyId = activeMembership.company_id;
     const storeId = activeStore.id;
 
-    const [projectsResult, clientsResult, budgetsResult, materialsResult] =
-      await Promise.all([
-        supabase
-          .from('woodworking_projects')
-          .select('id', { count: 'exact', head: true })
-          .eq('company_id', companyId)
-          .eq('store_id', storeId)
-          .in('status', ['PENDING', 'IN_PROGRESS']),
+    // Os indicadores do painel vêm dos projetos/serviços cadastrados nesta unidade.
+    // Não usamos a tabela "budgets", pois os orçamentos são projetos com status QUOTE.
+    const { data: projects, error } = await supabase
+      .from('woodworking_projects')
+      .select('id, status, estimated_value, materials_cost')
+      .eq('company_id', companyId)
+      .eq('store_id', storeId);
 
-        supabase
-          .from('clients')
-          .select('id', { count: 'exact', head: true })
-          .eq('company_id', companyId)
-          .eq('store_id', storeId),
+    if (error) throw error;
 
-        supabase
-          .from('budgets')
-          .select('id', { count: 'exact', head: true })
-          .eq('company_id', companyId)
-          .eq('store_id', storeId),
+    const rows = projects || [];
+    const budgetCount = rows.filter(project => project.status === 'QUOTE').length;
+    const grossProfit = rows
+      .filter(project => project.status !== 'CANCELLED')
+      .reduce((total, project) => {
+        const serviceValue = Number(project.estimated_value || 0);
+        const materialsCost = Number(project.materials_cost || 0);
+        return total + serviceValue - materialsCost;
+      }, 0);
 
-        supabase
-          .from('materials')
-          .select('id', { count: 'exact', head: true })
-          .eq('company_id', companyId)
-          .eq('store_id', storeId)
-          .eq('is_active', true)
-      ]);
+    setText('activeProjectsCount', rows.length);
+    setText('budgetsCount', budgetCount);
+    setText('grossProfit', formatCurrency(grossProfit));
 
-    const results = [
-      projectsResult,
-      clientsResult,
-      budgetsResult,
-      materialsResult
-    ];
+    // Mantém os contadores auxiliares existentes para outras partes do menu.
+    const [clientsResult, materialsResult] = await Promise.all([
+      supabase
+        .from('clients')
+        .select('id', { count: 'exact', head: true })
+        .eq('company_id', companyId)
+        .eq('store_id', storeId),
+      supabase
+        .from('materials')
+        .select('id', { count: 'exact', head: true })
+        .eq('company_id', companyId)
+        .eq('store_id', storeId)
+        .eq('is_active', true)
+    ]);
 
-    const failed = results.find((result) => result.error);
+    if (clientsResult.error) throw clientsResult.error;
+    if (materialsResult.error) throw materialsResult.error;
 
-    if (failed) throw failed.error;
-
-    setText('activeProjectsCount', projectsResult.count ?? 0);
     setText('clientsCount', clientsResult.count ?? 0);
-    setText('budgetsCount', budgetsResult.count ?? 0);
     setText('materialsCount', materialsResult.count ?? 0);
   }
 
